@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "Sm8ZWmaDI8U=",
+  "dgSpecHash": "oETeXu0wXBc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\jbish\\ProductionSupportRepo\\Application\\Project\\SupportOps\\Backend\\SupportOps.Application\\SupportOps.Application.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\jbish\\ProductionSupportRepo\\SmallBusinessSupportWebSite\\Backend\\SupportOps.Application\\SupportOps.Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jbish\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.27\\microsoft.netcore.app.ref.8.0.27.nupkg.sha512",
+    "C:\\Users\\jbish\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.27\\microsoft.windowsdesktop.app.ref.8.0.27.nupkg.sha512",
+    "C:\\Users\\jbish\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.27\\microsoft.aspnetcore.app.ref.8.0.27.nupkg.sha512"
+  ],
   "logs": []
 }
