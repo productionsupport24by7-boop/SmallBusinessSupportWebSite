@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="SupportOps.API/SupportOps.API.csproj" />
+  <Project Path="SupportOps.Application/SupportOps.Application.csproj" />
+  <Project Path="SupportOps.Domain/SupportOps.Domain.csproj" />
+  <Project Path="SupportOps.Infrastructure/SupportOps.Infrastructure.csproj" />
+  <Project Path="SupportOps.Shared/SupportOps.Shared.csproj" />
+</Solution>
