@@ -14,8 +14,19 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-Console.WriteLine(
-    builder.Configuration.GetConnectionString("DefaultConnection"));
+// Console.WriteLine(
+//     builder.Configuration.GetConnectionString("DefaultConnection"));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Angular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 
 
 var app = builder.Build();
@@ -48,6 +59,7 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+app.UseCors("Angular");
 app.MapControllers();
 app.Run();
 
