@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SupportOps.Domain.Entities;
 
+
+
 namespace SupportOps.Infrastructure.Data;
 
 public class SupportOpsDbContext : DbContext
@@ -11,6 +13,7 @@ public class SupportOpsDbContext : DbContext
     }
 
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+    public DbSet<ContactRequest> ContactRequests => Set<ContactRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,5 +22,5 @@ public class SupportOpsDbContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SupportOpsDbContext).Assembly);
     }
 
-    public DbSet<ContactRequest> ContactRequests => Set<ContactRequest>();
+
 }
