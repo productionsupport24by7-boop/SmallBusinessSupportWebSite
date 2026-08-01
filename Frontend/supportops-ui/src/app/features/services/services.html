@@ -1,0 +1,41 @@
+<section class="services-page">
+
+  <h1>Our Services</h1>
+
+  <p class="subtitle">
+    Reliable IT operations for small and medium businesses.
+  </p>
+
+  <div class="service-grid">
+
+    @for(service of services; track service.id){
+
+      <mat-card>
+
+        <mat-icon>{{service.icon}}</mat-icon>
+
+        <h2>{{service.title}}</h2>
+
+        <p>{{service.description}}</p>
+
+        <ul>
+
+          @for(feature of service.features; track feature){
+
+            <li>{{feature}}</li>
+
+          }
+
+        </ul>
+
+        <button mat-raised-button color="primary">
+          Learn More
+        </button>
+
+      </mat-card>
+
+    }
+
+  </div>
+
+</section>

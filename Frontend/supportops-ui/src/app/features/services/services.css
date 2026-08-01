@@ -1,0 +1,35 @@
+.services-page{
+    padding:60px 20px;
+    max-width:1200px;
+    margin:auto;
+}
+
+.subtitle{
+    color:#666;
+    margin-bottom:40px;
+}
+
+.service-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:24px;
+}
+
+mat-card{
+    padding:24px;
+}
+
+mat-icon{
+    font-size:40px;
+    width:40px;
+    height:40px;
+    color:#1565C0;
+}
+
+ul{
+    padding-left:18px;
+}
+
+button{
+    margin-top:20px;
+}

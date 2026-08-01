@@ -18,4 +18,6 @@ public class SupportOpsDbContext : DbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SupportOpsDbContext).Assembly);
     }
+
+    public DbSet<ContactRequest> ContactRequests => Set<ContactRequest>();
 }

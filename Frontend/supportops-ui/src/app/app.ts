@@ -1,10 +1,12 @@
 import { Component, signal,OnInit,inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HealthService, HealthResponse } from './core/services/health.service';
+import { Header } from './shared/components/header/header';
+import { Footer } from './shared/components/footer/footer';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet,Header,Footer],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

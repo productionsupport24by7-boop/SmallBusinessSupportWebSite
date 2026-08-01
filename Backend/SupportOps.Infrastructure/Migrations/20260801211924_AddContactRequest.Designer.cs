@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupportOps.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SupportOps.Infrastructure.Data;
 namespace SupportOps.Infrastructure.Migrations
 {
     [DbContext(typeof(SupportOpsDbContext))]
-    partial class SupportOpsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260801211924_AddContactRequest")]
+    partial class AddContactRequest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
