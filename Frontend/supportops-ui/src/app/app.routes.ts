@@ -4,8 +4,13 @@ import { Home } from './features/home/home';
 import { Services } from './features/services/services';
 import { About } from './features/about/about';
 import { Contact } from './features/contact/contact';
+import { Dashboard } from './features/admin/dashboard/dashboard';
 
 export const routes: Routes = [
+  {
+    path: 'dashboard',
+    component: Dashboard
+  },
   {
     path: '',
     component: Home

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { ContactRequest } from '../models/contact-request';
 import { environment } from '../../../environments/environment';
+import { ContactResponse } from '../models/contact-response';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,9 @@ export class ContactService {
 
     return this.http.post(this.apiUrl, request);
 
+  }
+  getAll(){
+    return this.http.get<ContactResponse[]>(this.apiUrl);
   }
 
 }
