@@ -1,0 +1,1 @@
+// This keeps business logic out of controllers and makes the code easier to test.
