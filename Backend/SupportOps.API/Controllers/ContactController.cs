@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SupportOps.Application.DTOs;
 using SupportOps.Domain.Entities;
 using SupportOps.Infrastructure.Persistence;
@@ -16,7 +17,29 @@ public class ContactController : ControllerBase
     {
         _context = context;
     }
+    // GET: api/contact
 
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        try
+        {
+            var contacts = await _context.ContactRequests
+                .OrderByDescending(x => x.CreatedOn)
+                .ToListAsync();
+
+            return Ok(contacts);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new
+                {
+                    Message = "An error occurred while retrieving contact requests.",
+                    Error = ex.Message
+                });
+        }
+    }
     [HttpPost]
     public async Task<IActionResult> Create(ContactRequestDto request)
     {
@@ -39,4 +62,8 @@ public class ContactController : ControllerBase
             message = "Contact request submitted successfully."
         });
     }
+
+
+
+
 }

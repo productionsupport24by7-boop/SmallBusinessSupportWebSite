@@ -8,8 +8,11 @@ import { Dashboard } from './features/admin/dashboard/dashboard';
 
 export const routes: Routes = [
   {
-    path: 'dashboard',
+    path: 'admin/dashboard',
     component: Dashboard
+    //  path:'admin/dashboard',
+    // loadComponent:()=>import('./features/admin/dashboard/dashboard')
+    //     .then(m=>m.Dashboard)
   },
   {
     path: '',

@@ -21,7 +21,9 @@ export class ContactService {
 
   }
   getAll(){
-    return this.http.get<ContactResponse[]>(this.apiUrl);
+        //console.log("getAll() called in ContactService");
+    return this.http.get<ContactResponse[] >(this.apiUrl);
+
   }
 
 }
