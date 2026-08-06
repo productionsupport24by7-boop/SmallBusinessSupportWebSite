@@ -1,19 +1,22 @@
-using Microsoft.AspNetCore.OpenApi;
+
 using Microsoft.Extensions.DependencyInjection;
+using SupportOps.API.Configuration;
 using SupportOps.Infrastructure.DependencyInjection;
 using SupportOps.Infrastructure.Data;
+using SupportOps.Application.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
-
-
 builder.Services.AddInfrastructure(builder.Configuration);
-
-
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+//builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerConfiguration();
 builder.Services.AddCorsConfiguration();
@@ -22,9 +25,45 @@ builder.Services.AddCorsConfiguration();
 //     builder.Configuration.GetConnectionString("DefaultConnection"));
 
 
+var jwtSettings = builder.Configuration
+    .GetSection("Jwt")
+    .Get<JwtSettings>()!;
+builder.Services.AddSingleton(jwtSettings);
+builder.Services.AddSingleton<JwtTokenGenerator>();
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings.Key))
+        };
+    });
+
+
+
+// Console.WriteLine(
+//     builder.Configuration.GetConnectionString("DefaultConnection"));
+
+
+builder.Services.AddAuthorization();
+
 
 
 var app = builder.Build();
+
+
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SupportOpsDbContext>();
@@ -35,11 +74,17 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwaggerConfiguration();
+    //app.UseSwaggerConfiguration();
+    app.UseSwagger();   // Serves the generated OpenAPI spec as a JSON endpoint
+    app.UseSwaggerUI(); // Serves the web UI using that JSON endpoint
 }
 
 
 //app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 var summaries = new[]
 {
@@ -59,7 +104,9 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
 app.UseCors("Angular");
+//app.MapSwagger();
 app.MapControllers();
 app.Run();
 
