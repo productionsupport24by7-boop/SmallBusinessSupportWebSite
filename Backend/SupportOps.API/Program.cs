@@ -1,4 +1,5 @@
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SupportOps.API.Configuration;
 using SupportOps.Infrastructure.DependencyInjection;
@@ -8,6 +9,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+using SupportOps.Application.Interfaces;
+using SupportOps.Application.Services;
+using SupportOps.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +25,19 @@ builder.Services.AddControllers();
 builder.Services.AddSwaggerConfiguration();
 builder.Services.AddCorsConfiguration();
 
+
+// Database
+builder.Services.AddDbContext<SupportOpsDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Authentication
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+
+
 // Console.WriteLine(
 //     builder.Configuration.GetConnectionString("DefaultConnection"));
 
@@ -30,6 +47,7 @@ var jwtSettings = builder.Configuration
     .Get<JwtSettings>()!;
 builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddSingleton<JwtTokenGenerator>();
+
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
