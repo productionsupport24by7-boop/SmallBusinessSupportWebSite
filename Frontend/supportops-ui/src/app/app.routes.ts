@@ -5,6 +5,7 @@ import { Services } from './features/services/services';
 import { About } from './features/about/about';
 import { Contact } from './features/contact/contact';
 import { Dashboard } from './features/admin/dashboard/dashboard';
+import { LoginComponent } from './features/login/login';
 
 export const routes: Routes = [
   {
@@ -37,6 +38,7 @@ export const routes: Routes = [
 //             .then(m => m.Contact)
 // }
 ,
+{path: 'login', component: LoginComponent},
   {
     path: '**',
     redirectTo: ''
