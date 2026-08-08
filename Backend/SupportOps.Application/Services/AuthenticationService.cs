@@ -1,5 +1,4 @@
-using BCrypt.Net;
-using Microsoft.EntityFrameworkCore;
+
 using SupportOps.Application.Interfaces;
 using SupportOps.Application.Security;
 

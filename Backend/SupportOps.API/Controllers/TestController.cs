@@ -34,4 +34,24 @@ public class TestController : ControllerBase
             Token = token
         });
     }
+
+    [HttpPost("token")]
+    public IActionResult GenerateToken(User user)
+    {
+        // var user = new User
+        // {
+        //     Id = 1,
+        //     FirstName = "Ishwor",
+        //     LastName = "Dangol",
+        //     Email = "admin@supportops.com",
+        //     Role = "Admin"
+        // };
+
+        var token = _jwtTokenGenerator.GenerateToken(user);
+
+        return Ok(new
+        {
+            Token = token
+        });
+    }
 }
