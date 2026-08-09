@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import {   ChangeDetectorRef,Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MatTableModule } from '@angular/material/table';
@@ -25,6 +25,7 @@ import { ContactResponse } from '../../../core/models/contact-response';
 export class Dashboard implements OnInit {
 
   private service = inject(ContactService);
+  private cdr = inject(ChangeDetectorRef);
 
   contacts: ContactResponse[] = [];
 
@@ -49,6 +50,7 @@ export class Dashboard implements OnInit {
       next:data=>{
 
         this.contacts=data;
+        this.cdr.detectChanges();
 
       },
 

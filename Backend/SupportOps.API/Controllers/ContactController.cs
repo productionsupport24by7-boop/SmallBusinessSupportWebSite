@@ -42,6 +42,8 @@ public class ContactController : ControllerBase
                 });
         }
     }
+
+    // [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create(ContactRequestDto request)
     {
