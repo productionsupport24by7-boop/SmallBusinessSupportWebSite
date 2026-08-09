@@ -20,7 +20,7 @@ public class ContactController : ControllerBase
     }
     // GET: api/contact
 
-    // [Authorize]
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -43,7 +43,7 @@ public class ContactController : ControllerBase
         }
     }
 
-    // [Authorize]
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create(ContactRequestDto request)
     {
