@@ -6,11 +6,13 @@ import { About } from './features/about/about';
 import { Contact } from './features/contact/contact';
 import { Dashboard } from './features/admin/dashboard/dashboard';
 import { LoginComponent } from './features/login/login';
+import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
   {
     path: 'admin/dashboard',
-    component: Dashboard
+    component: Dashboard,
+     canActivate: [authGuard]
     //  path:'admin/dashboard',
     // loadComponent:()=>import('./features/admin/dashboard/dashboard')
     //     .then(m=>m.Dashboard)
@@ -29,7 +31,8 @@ export const routes: Routes = [
   },
   {
     path: 'contact',
-    component: Contact
+    component: Contact,
+    canActivate: [authGuard]
   }
 //   {
 //     path: 'contact',

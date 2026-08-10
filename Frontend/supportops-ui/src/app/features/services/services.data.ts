@@ -10,7 +10,8 @@ export const SERVICES: Service[] = [
       'Incident Management',
       'Root Cause Analysis',
       'Application Monitoring',
-      'SLA Management'
+      'SLA Management',
+      'MTTR and MTTA Analysis'
     ]
   },
   {

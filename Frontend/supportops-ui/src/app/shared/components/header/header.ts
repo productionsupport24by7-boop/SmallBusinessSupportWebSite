@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component,inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
+import { AuthService } from '../../../core/services/auth';
+
 
 @Component({
   selector: 'app-header',
@@ -9,9 +11,23 @@ import { MatButtonModule } from '@angular/material/button';
   imports: [
     RouterLink,
     MatToolbarModule,
-    MatButtonModule
-  ],
+    MatButtonModule,
+
+],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class Header {}
+export class Header {
+
+private readonly authService = inject(AuthService);
+private readonly router = inject(Router);
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+}

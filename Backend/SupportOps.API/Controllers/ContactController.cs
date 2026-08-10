@@ -10,6 +10,7 @@ namespace SupportOps.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ContactController : ControllerBase
 {
     private readonly SupportOpsDbContext _context;
@@ -20,7 +21,7 @@ public class ContactController : ControllerBase
     }
     // GET: api/contact
 
-    [Authorize]
+
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -43,7 +44,7 @@ public class ContactController : ControllerBase
         }
     }
 
-    [Authorize]
+
     [HttpPost]
     public async Task<IActionResult> Create(ContactRequestDto request)
     {

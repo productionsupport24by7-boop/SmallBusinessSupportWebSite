@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using SupportOps.Application.DTOs;
 using SupportOps.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SupportOps.API.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+[Authorize]
 public class AuthController : ControllerBase
 {
     private readonly IAuthenticationService _authenticationService;
@@ -16,6 +18,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var token = await _authenticationService.LoginAsync(
