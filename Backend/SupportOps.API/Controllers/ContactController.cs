@@ -10,7 +10,7 @@ namespace SupportOps.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Admin,SupportAgent")]
 public class ContactController : ControllerBase
 {
     private readonly SupportOpsDbContext _context;
