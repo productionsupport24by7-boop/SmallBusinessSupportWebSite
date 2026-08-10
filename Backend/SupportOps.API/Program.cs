@@ -81,7 +81,8 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 
-
+//this will seed the database with initial data if it is empty
+//add application user roles and a default admin user
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SupportOpsDbContext>();

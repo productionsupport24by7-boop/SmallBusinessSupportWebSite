@@ -15,6 +15,7 @@ public class User
 
     public string Role { get; set; } = "Admin";
 
+
     public bool IsActive { get; set; } = true;
 
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
