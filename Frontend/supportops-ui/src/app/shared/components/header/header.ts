@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../../core/services/auth';
+import { NgIf } from "../../../../../node_modules/@angular/common/types/_common_module-chunk";
 
 
 @Component({
@@ -30,4 +31,9 @@ private readonly router = inject(Router);
     this.authService.logout();
     this.router.navigate(['/login']);
   }
+
+get userRole(): string | null {
+  return this.authService.getRole();
+}
+
 }

@@ -10,7 +10,7 @@ namespace SupportOps.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin,SupportAgent")]
+
 public class ContactController : ControllerBase
 {
     private readonly SupportOpsDbContext _context;
@@ -23,6 +23,7 @@ public class ContactController : ControllerBase
 
 
     [HttpGet]
+    [Authorize(Roles = "Admin,SupportAgent")]
     public async Task<IActionResult> GetAll()
     {
         try
@@ -46,6 +47,7 @@ public class ContactController : ControllerBase
 
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Create(ContactRequestDto request)
     {
         var entity = new ContactRequest

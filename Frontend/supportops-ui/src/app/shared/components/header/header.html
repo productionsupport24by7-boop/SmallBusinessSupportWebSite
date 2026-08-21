@@ -6,7 +6,9 @@
 
   <span class="spacer"></span>
 
-   <a mat-button routerLink="/admin/dashboard">Dashboard</a>
+   @if(userRole=='Admin'|| userRole=='SupportAgent'){
+    <a mat-button routerLink="/admin/dashboard" >Dashboard</a>
+  }
   <a mat-button routerLink="/">Home</a>
 
   <a mat-button routerLink="/services">

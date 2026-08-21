@@ -13,11 +13,15 @@ using SupportOps.Application.Interfaces;
 using SupportOps.Application.Services;
 using SupportOps.Infrastructure.Repositories;
 
+//create a builder for the web application
 var builder = WebApplication.CreateBuilder(args);
 
+Console.WriteLine(
+    args.Length > 0 ? $"Command-line arguments: {string.Join(", ", args)}" : "No command-line arguments provided.");
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
+//add services to builder like controllers,dbcontext swagger, dependency injection and CORS configuration
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
 //builder.Services.AddEndpointsApiExplorer();
