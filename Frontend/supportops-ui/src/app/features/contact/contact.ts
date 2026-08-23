@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -18,22 +17,20 @@ import { ContactService } from '../../core/services/contact.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    HttpClientModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
     MatCardModule,
-    MatSnackBarModule
+    MatSnackBarModule,
   ],
   templateUrl: './contact.html',
-  styleUrl: './contact.css'
+  styleUrl: './contact.css',
 })
 export class Contact {
-
-  private fb = inject(FormBuilder);
-  private contactService = inject(ContactService);
-  private snackBar = inject(MatSnackBar);
+  readonly fb = inject(FormBuilder);
+  readonly contactService = inject(ContactService);
+  readonly snackBar = inject(MatSnackBar);
 
   isSubmitting = false;
 
@@ -43,11 +40,10 @@ export class Contact {
     email: ['', [Validators.required, Validators.email]],
     phone: [''],
     service: ['', Validators.required],
-    message: ['', [Validators.required, Validators.minLength(10)]]
+    message: ['', [Validators.required, Validators.minLength(10)]],
   });
 
   submit() {
-
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -55,33 +51,23 @@ export class Contact {
 
     this.isSubmitting = true;
 
-    this.contactService. create(this.form.getRawValue() as any)
-      .subscribe({
-        next: () => {
+    this.contactService.create(this.form.getRawValue() as any).subscribe({
+      next: () => {
+        this.snackBar.open('Thank you! We will contact you shortly.', 'Close', {
+          duration: 4000,
+        });
 
-          this.snackBar.open(
-            'Thank you! We will contact you shortly.',
-            'Close',
-            {
-              duration: 4000
-            });
+        this.form.reset();
+        this.isSubmitting = false;
+      },
 
-          this.form.reset();
-          this.isSubmitting = false;
-        },
+      error: () => {
+        this.snackBar.open('Unable to submit your request.', 'Close', {
+          duration: 4000,
+        });
 
-        error: () => {
-
-          this.snackBar.open(
-            'Unable to submit your request.',
-            'Close',
-            {
-              duration: 4000
-            });
-
-          this.isSubmitting = false;
-        }
-      });
+        this.isSubmitting = false;
+      },
+    });
   }
-
 }

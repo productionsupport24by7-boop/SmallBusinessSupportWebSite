@@ -6,7 +6,7 @@ import { About } from './features/about/about';
 import { Contact } from './features/contact/contact';
 import { Dashboard } from './features/admin/dashboard/dashboard';
 import { LoginComponent } from './features/login/login';
-import { authGuard } from './core/guards/auth-guard';
+
 import { roleGuard } from './core/guards/role.guard';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied';
 

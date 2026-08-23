@@ -12,6 +12,7 @@ using System.Text;
 using SupportOps.Application.Interfaces;
 using SupportOps.Application.Services;
 using SupportOps.Infrastructure.Repositories;
+using SupportOps.API.Models;
 
 //create a builder for the web application
 var builder = WebApplication.CreateBuilder(args);
@@ -24,8 +25,6 @@ Console.WriteLine(
 //add services to builder like controllers,dbcontext swagger, dependency injection and CORS configuration
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerConfiguration();
 builder.Services.AddCorsConfiguration();
 
@@ -74,8 +73,6 @@ builder.Services
 
 
 
-// Console.WriteLine(
-//     builder.Configuration.GetConnectionString("DefaultConnection"));
 
 
 builder.Services.AddAuthorization();
@@ -94,13 +91,8 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(db);
 }
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    //app.UseSwaggerConfiguration();
-    app.UseSwagger();   // Serves the generated OpenAPI spec as a JSON endpoint
-    app.UseSwaggerUI(); // Serves the web UI using that JSON endpoint
-}
+
+app.UseSwaggerConfiguration();
 
 
 //app.UseHttpsRedirection();
@@ -131,10 +123,13 @@ app.MapGet("/weatherforecast", () =>
 app.UseCors("Angular");
 //app.MapSwagger();
 app.MapControllers();
-app.Run();
+await app.RunAsync();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+namespace SupportOps.API.Models
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+    {
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
 }
 

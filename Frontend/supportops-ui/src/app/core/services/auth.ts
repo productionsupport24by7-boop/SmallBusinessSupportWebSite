@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
-import { PLATFORM_ID } from '@angular/core';
+
 import { jwtDecode } from 'jwt-decode';
 
 export interface LoginRequest {
@@ -93,7 +93,7 @@ export class AuthService {
         (decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] as string) ??
         null;
 
-      console.log('JWT Role:', role);
+      //console.log('JWT Role:', role);
       return typeof role === 'string' ? role : null;
     } catch (error) {
       console.error('Unable to decode JWT:', error);

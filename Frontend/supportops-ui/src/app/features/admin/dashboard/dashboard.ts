@@ -8,7 +8,6 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { ContactService } from '../../../core/services/contact.service';
 import { ContactResponse } from '../../../core/models/contact-response';
-import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,8 +17,8 @@ import { AuthService } from '../../../core/services/auth';
   styleUrl: './dashboard.css',
 })
 export class Dashboard implements OnInit {
-  private service = inject(ContactService);
-  private cdr = inject(ChangeDetectorRef);
+  readonly service = inject(ContactService);
+  readonly cdr = inject(ChangeDetectorRef);
 
   contacts: ContactResponse[] = [];
 
@@ -39,6 +38,7 @@ export class Dashboard implements OnInit {
   // }
 
   ngOnInit(): void {
+    console.log('ngOnInit called');
     this.loadContacts();
   }
 
