@@ -1,0 +1,44 @@
+.hero{
+    text-align:center;
+    padding:100px 20px;
+    background:#f5f7fb;
+}
+
+.hero h1{
+    font-size:56px;
+    font-weight:700;
+}
+
+.hero h2{
+    margin-top:20px;
+    color:#555;
+}
+
+.hero p{
+    margin-top:20px;
+    font-size:20px;
+}
+
+.buttons{
+    margin-top:40px;
+}
+
+.buttons button{
+    margin:10px;
+}
+
+.features{
+    padding:60px;
+}
+
+.feature-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:25px;
+    margin-top:30px;
+}
+
+mat-card{
+    padding:25px;
+    text-align:center;
+}

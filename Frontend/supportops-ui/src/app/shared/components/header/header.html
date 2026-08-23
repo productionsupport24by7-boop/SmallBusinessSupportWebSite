@@ -1,0 +1,37 @@
+<mat-toolbar color="primary">
+
+  <span class="logo">
+    SupportOps Solutions
+  </span>
+
+  <span class="spacer"></span>
+
+   @if(userRole=='Admin'|| userRole=='SupportAgent'){
+    <a mat-button routerLink="/admin/dashboard" >Dashboard</a>
+  }
+  <a mat-button routerLink="/">Home</a>
+
+  <a mat-button routerLink="/services">
+    Services
+  </a>
+
+  <a mat-button routerLink="/about">
+    About
+  </a>
+
+  <a mat-button routerLink="/contact">
+    Contact
+  </a>
+
+  <button
+      mat-raised-button
+      color="accent">
+
+      Free Consultation
+
+  </button>
+  <button mat-button (click)="logout()" routerLink="/login" >
+    Logout
+  </button>
+
+</mat-toolbar>
