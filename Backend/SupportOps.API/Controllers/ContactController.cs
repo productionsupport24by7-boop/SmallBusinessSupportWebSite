@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SupportOps.Application.DTOs;
 using SupportOps.Domain.Entities;
-using SupportOps.Infrastructure.Persistence;
 using SupportOps.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 
@@ -10,6 +9,7 @@ namespace SupportOps.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 
 public class ContactController : ControllerBase
 {

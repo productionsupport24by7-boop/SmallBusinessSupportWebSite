@@ -1,6 +1,6 @@
-import { Component, signal,OnInit,inject } from '@angular/core';
+import { Component, signal, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HealthService, HealthResponse } from './core/services/health.service';
+import { HealthService } from './core/services/health.service';
 import { Header } from './shared/components/header/header';
 import { Footer } from './shared/components/footer/footer';
 //import { AuthService }  from  './core/services/auth';
@@ -8,22 +8,17 @@ import { Footer } from './shared/components/footer/footer';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet,Header,Footer],
+  imports: [RouterOutlet, Header, Footer],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App implements OnInit {
   protected readonly title = signal('supportops-ui');
-  private healthService = inject(HealthService);
+  private readonly healthService = inject(HealthService);
   //private authService = inject(AuthService);
 
-
-
-
   ngOnInit(): void {
-
     this.healthService.getHealth().subscribe({
-
       next: (response) => {
         console.log('API Response');
         console.log(response);
@@ -31,8 +26,7 @@ export class App implements OnInit {
 
       error: (error) => {
         console.error(error);
-      }
-
+      },
     });
   }
 
@@ -58,9 +52,3 @@ export class App implements OnInit {
   //   });
   // }
 }
-
-
-
-
-
-

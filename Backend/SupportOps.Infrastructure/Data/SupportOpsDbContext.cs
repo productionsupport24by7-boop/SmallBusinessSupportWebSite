@@ -15,7 +15,7 @@ public class SupportOpsDbContext : DbContext
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<ContactRequest> ContactRequests => Set<ContactRequest>();
     public DbSet<User> Users => Set<User>();
-
+    public DbSet<Ticket> Tickets { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

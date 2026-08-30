@@ -1,6 +1,5 @@
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using SupportOps.API.Configuration;
 using SupportOps.Infrastructure.DependencyInjection;
 using SupportOps.Infrastructure.Data;
@@ -25,6 +24,7 @@ Console.WriteLine(
 //add services to builder like controllers,dbcontext swagger, dependency injection and CORS configuration
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
+
 builder.Services.AddSwaggerConfiguration();
 builder.Services.AddCorsConfiguration();
 
@@ -36,8 +36,12 @@ builder.Services.AddDbContext<SupportOpsDbContext>(options =>
 
 // Authentication
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+
+
+
 
 
 
@@ -73,13 +77,12 @@ builder.Services
 
 
 
-
-
 builder.Services.AddAuthorization();
 
 
 
 var app = builder.Build();
+
 
 
 //this will seed the database with initial data if it is empty
