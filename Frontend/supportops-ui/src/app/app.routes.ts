@@ -9,6 +9,7 @@ import { LoginComponent } from './features/login/login';
 
 import { roleGuard } from './core/guards/role.guard';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied';
+import { TicketList } from './features/tickets/ticket-list/ticket-list';
 
 export const routes: Routes = [
   //   {
@@ -41,8 +42,13 @@ export const routes: Routes = [
   {
     path: 'contact',
     component: Contact,
-    canActivate: [roleGuard(['Admin', 'SupportAgent'])],
+    // canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
     //canActivate: [authGuard]
+  },
+  {
+    path: 'tickets',
+    component: TicketList,
+    //canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
   },
   //   {
   //     path: 'contact',
@@ -54,6 +60,7 @@ export const routes: Routes = [
     path: 'access-denied',
     component: AccessDeniedComponent,
   },
+
   { path: 'login', component: LoginComponent },
   {
     path: '**',

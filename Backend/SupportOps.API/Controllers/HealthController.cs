@@ -5,11 +5,11 @@ namespace SupportOps.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-
+[Authorize]
 public class HealthController : ControllerBase
 {
     [HttpGet]
-    [Authorize(Roles = "Admin,SupportAgent,Customer")]
+    [AllowAnonymous]
     public IActionResult Get()
     {
         return Ok(new

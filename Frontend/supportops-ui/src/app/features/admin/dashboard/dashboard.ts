@@ -38,7 +38,7 @@ export class Dashboard implements OnInit {
   // }
 
   ngOnInit(): void {
-    console.log('ngOnInit called');
+    console.log('ngOnInit called dashboard');
     this.loadContacts();
   }
 

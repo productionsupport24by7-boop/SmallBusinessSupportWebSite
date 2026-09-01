@@ -19,7 +19,7 @@ public class TicketsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Customer")]
+    [Authorize(Roles = "Customer,SupportAgent,Admin")]
     public async Task<IActionResult> Create(
         CreateTicketRequest request)
     {
@@ -55,7 +55,7 @@ public class TicketsController : ControllerBase
 
 
     [HttpGet("{id:int}")]
-    [Authorize]
+    [Authorize(Roles = "Customer,Admin,SupportAgent")]
     public async Task<IActionResult> GetById(int id)
     {
 
@@ -64,12 +64,18 @@ public class TicketsController : ControllerBase
         var role = User.FindFirstValue(ClaimTypes.Role);
         if (!int.TryParse(userIdClaim, out var userId))
         {
+            Console.WriteLine("Failed to parse user ID" + userId);
             return Unauthorized();
         }
 
         if (string.IsNullOrWhiteSpace(role))
         {
+            Console.WriteLine("Failed to parse role" + role);
             return Unauthorized();
+        }
+        if (role != "Admin" && role != "SupportAgent" && role == "Customer")
+        {
+
         }
         var ticket = await _ticketService.GetByIdAsync(id, userId, role);
 
@@ -112,5 +118,30 @@ public class TicketsController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    [HttpGet("my")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetMyTickets()
+    {
+        var userIdClaim =
+            User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        foreach (var claim in User.Claims)
+        {
+            Console.WriteLine(
+                $"CLAIM: {claim.Type} = {claim.Value}");
+        }
+
+        if (!int.TryParse(userIdClaim, out var userId))
+        {
+            Console.WriteLine("Failed to parse user ID" + userId);
+            return Unauthorized();
+        }
+
+        var tickets =
+            await _ticketService.GetMyTicketsAsync(userId);
+
+        return Ok(tickets);
     }
 }

@@ -19,4 +19,6 @@ public interface ITicketService
         UpdateTicketRequest request);
     Task<bool> DeleteAsync(int id);
 
+    Task<List<TicketResponse>> GetMyTicketsAsync(int customerId);
+
 }

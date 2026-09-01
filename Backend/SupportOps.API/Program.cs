@@ -41,14 +41,6 @@ builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 
 
-
-
-
-
-// Console.WriteLine(
-//     builder.Configuration.GetConnectionString("DefaultConnection"));
-
-
 var jwtSettings = builder.Configuration
     .GetSection("Jwt")
     .Get<JwtSettings>()!;
@@ -80,29 +72,14 @@ builder.Services
 builder.Services.AddAuthorization();
 
 
-
 var app = builder.Build();
-
-
-
-//this will seed the database with initial data if it is empty
-//add application user roles and a default admin user
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<SupportOpsDbContext>();
-
-    await DbSeeder.SeedAsync(db);
-}
-
-
 app.UseSwaggerConfiguration();
-
-
 //app.UseHttpsRedirection();
-
+app.UseCors("Angular");
 app.UseAuthentication();
-
 app.UseAuthorization();
+//app.MapSwagger();
+app.MapControllers();
 
 var summaries = new[]
 {
@@ -123,9 +100,15 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast");
 
-app.UseCors("Angular");
-//app.MapSwagger();
-app.MapControllers();
+//this will seed the database with initial data if it is empty
+//add application user roles and a default admin user
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SupportOpsDbContext>();
+
+    await DbSeeder.SeedAsync(db);
+}
+
 await app.RunAsync();
 
 namespace SupportOps.API.Models

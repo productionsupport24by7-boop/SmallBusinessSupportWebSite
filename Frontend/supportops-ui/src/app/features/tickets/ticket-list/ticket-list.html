@@ -1,0 +1,94 @@
+<div class="ticket-container">
+
+  <div class="ticket-header">
+    <div>
+      <h2>My Tickets</h2>
+      <p>View and track your support requests.</p>
+
+          </div>
+  </div>
+
+  <!-- @if (loading) {
+    <div class="loading">
+      Loading tickets...
+    </div>
+  } -->
+
+  @if (errorMessage) {
+    <div class="error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <!-- @if (!loading && !errorMessage && tickets.length === 0) { -->
+     @if (tickets.length === 0) {
+    <div class="empty">
+      <h3>No tickets found</h3>
+      <p>You have not submitted any support tickets yet.</p>
+    </div>
+  }
+
+  @if (tickets.length > 0) {
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Title</th>
+            <th>Priority</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (ticket of tickets; track ticket.id) {
+
+            <tr>
+
+              <td>
+                <strong>
+                  {{ ticket.ticketNumber }}
+                </strong>
+              </td>
+
+              <td>
+                {{ ticket.title }}
+              </td>
+
+              <td>
+                {{ ticket.priority }}
+              </td>
+
+              <td>
+                {{ ticket.category }}
+              </td>
+
+              <td>
+                <span class="status">
+                  {{ ticket.status }}
+                </span>
+              </td>
+
+              <td>
+                {{ ticket.createdOn | date:'medium' }}
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+
+</div>

@@ -59,4 +59,13 @@ public class TicketRepository : ITicketRepository
 
         return true;
     }
+
+    public async Task<List<Ticket>> GetByCustomerIdAsync(
+    int customerId)
+    {
+        return await _context.Tickets
+            .Where(x => x.CustomerId == customerId)
+            .OrderByDescending(x => x.CreatedOn)
+            .ToListAsync();
+    }
 }

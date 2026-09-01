@@ -56,8 +56,8 @@ public class TicketService : ITicketService
         if (role == "Customer" &&
             ticket.CustomerId != userId)
         {
-                // Service layer cannot return IActionResult; indicate no access by returning null
-                return null;
+            // Service layer cannot return IActionResult; indicate no access by returning null
+            return null;
         }
 
         return MapToResponse(ticket);
@@ -130,5 +130,15 @@ public class TicketService : ITicketService
             UpdatedOn = ticket.UpdatedOn,
             ResolvedOn = ticket.ResolvedOn
         };
+    }
+
+    public async Task<List<TicketResponse>> GetMyTicketsAsync(
+    int customerId)
+    {
+        var tickets = await _ticketRepository.GetByCustomerIdAsync(customerId);
+
+        return tickets
+            .Select(MapToResponse)
+            .ToList();
     }
 }
