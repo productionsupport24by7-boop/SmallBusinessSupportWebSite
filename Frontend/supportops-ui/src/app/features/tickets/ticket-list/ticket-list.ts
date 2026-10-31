@@ -73,4 +73,8 @@ export class TicketList implements OnInit {
   viewDetails(ticket: Ticket): void {
     this.router.navigate(['/tickets', ticket.id]);
   }
+
+  createTicket(): void {
+    this.router.navigate(['/customer/tickets/create']);
+  }
 }

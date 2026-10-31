@@ -48,16 +48,16 @@ export const routes: Routes = [
     // canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
     //canActivate: [authGuard]
   },
-  {
-    path: 'tickets/:id',
-    component: TicketDetailsComponent,
-    canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
-  },
+
   {
     path: 'tickets',
     component: TicketList,
     canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
-    //canActivate: [roleGuard(['Customer'])],
+  },
+  {
+    path: 'tickets/:id',
+    component: TicketDetailsComponent,
+    canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
   },
   {
     path: 'customer/tickets/create',

@@ -5,6 +5,9 @@
       <p>View and track your support requests.</p>
     </div>
   </div>
+  <div>
+    <button type="button" class="btn btn-primary" (click)="createTicket()">Create Ticket</button>
+  </div>
 
   @if (loading()) {
     <div class="loading">Loading tickets...(loading)</div>

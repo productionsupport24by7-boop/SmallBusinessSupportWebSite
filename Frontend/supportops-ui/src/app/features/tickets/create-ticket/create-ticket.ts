@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 
 import { TicketService } from '../../../core/services/ticket';
 import { CreateTicketRequest } from '../../../core/models/icreate-ticket-request';
@@ -23,16 +24,13 @@ export class CreateTicketComponent {
 
   ticketForm = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(200)]],
-
     description: ['', [Validators.required, Validators.maxLength(5000)]],
-
     priority: ['Medium', Validators.required],
-
-    category: ['General', Validators.required],
+    category: ['Other', Validators.required],
   });
 
   submit(): void {
-    if (this.ticketForm.invalid) {
+    if (this.ticketForm.invalid || this.submitting) {
       this.ticketForm.markAllAsTouched();
       return;
     }
@@ -42,24 +40,32 @@ export class CreateTicketComponent {
 
     const request: CreateTicketRequest = this.ticketForm.getRawValue();
 
-    this.ticketService.createTicket(request).subscribe({
-      next: (ticket) => {
-        console.log('Ticket created:', ticket);
+    this.ticketService
+      .createTicket(request)
+      .pipe(finalize(() => (this.submitting = false)))
+      .subscribe({
+        next: (ticket) => {
+          this.router.navigate(['/tickets', ticket.id]);
+        },
+        error: (error) => {
+          console.error('Unable to create ticket:', error);
 
-        this.router.navigate(['/customer/tickets']);
-      },
-
-      error: (error) => {
-        console.error('Unable to create ticket:', error);
-
-        this.errorMessage = 'Unable to create ticket. Please try again.';
-
-        this.submitting = false;
-      },
-    });
+          if (error.status === 400) {
+            this.errorMessage = 'Please check the ticket information and try again.';
+          } else if (error.status === 401) {
+            this.errorMessage = 'Your session has expired. Please log in again.';
+          } else if (error.status === 403) {
+            this.errorMessage = 'You are not authorized to create a ticket.';
+          } else if (error.status === 0) {
+            this.errorMessage = 'Unable to connect to the support service.';
+          } else {
+            this.errorMessage = 'Unable to create ticket. Please try again.';
+          }
+        },
+      });
   }
 
   cancel(): void {
-    this.router.navigate(['/customer/tickets']);
+    this.router.navigate(['/tickets']);
   }
 }
