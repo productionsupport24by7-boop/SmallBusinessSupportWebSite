@@ -10,6 +10,9 @@ import { LoginComponent } from './features/login/login';
 import { roleGuard } from './core/guards/role.guard';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied';
 import { TicketList } from './features/tickets/ticket-list/ticket-list';
+import { CreateTicketComponent } from './features/tickets/create-ticket/create-ticket';
+
+import { TicketDetailsComponent } from './features/tickets/ticket-details.component/ticket-details.component';
 
 export const routes: Routes = [
   //   {
@@ -46,10 +49,22 @@ export const routes: Routes = [
     //canActivate: [authGuard]
   },
   {
+    path: 'tickets/:id',
+    component: TicketDetailsComponent,
+    canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
+  },
+  {
     path: 'tickets',
     component: TicketList,
-    //canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
+    canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
+    //canActivate: [roleGuard(['Customer'])],
   },
+  {
+    path: 'customer/tickets/create',
+    component: CreateTicketComponent,
+    canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
+  },
+
   //   {
   //     path: 'contact',
   //     loadComponent: () =>

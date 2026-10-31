@@ -1,0 +1,61 @@
+<div class="ticket-details-container">
+  <div class="page-header">
+    <h2>Ticket Details</h2>
+    <button type="button" class="back-button" (click)="goBack()">← Back to Tickets</button>
+  </div>
+  <!-- @if (loading) {
+    <div class="loading">Loading ticket...</div>
+  } -->
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+
+  @if (ticket != null) {
+    <div class="ticket-card">
+      <div class="ticket-header">
+        <div>
+          <div class="ticket-number">{{ ticket.ticketNumber }}</div>
+          <h3>{{ ticket.title }}</h3>
+        </div>
+        <span class="status"> {{ ticket.status }} </span>
+      </div>
+      <hr />
+      <div class="ticket-information">
+        <div class="info-item">
+          <label>Category</label> <span>{{ ticket.category }}</span>
+        </div>
+        <div class="info-item">
+          <label>Priority</label> <span>{{ ticket.priority }}</span>
+        </div>
+        <div class="info-item">
+          <label>Status</label> <span>{{ ticket.status }}</span>
+        </div>
+        <div class="info-item">
+          <label>Assigned To</label> <span> {{ ticket.assignedToUserId || 'Unassigned' }} </span>
+        </div>
+        <div class="info-item">
+          <label>Created</label> <span> {{ ticket.createdAt }} </span>
+        </div>
+        <div class="info-item">
+          <label>Last Updated</label>
+          <span>
+            @if (ticket.updatedAt) {
+              {{ ticket.updatedAt }}
+            } @else {
+              Not updated
+            }
+          </span>
+        </div>
+      </div>
+      <div class="description-section">
+        <h4>Description</h4>
+        <div class="description">{{ ticket.description }}</div>
+      </div>
+      @if (ticket.resolvedAt) {
+        <div class="resolved-section">
+          <label>Resolved At</label> <span> {{ ticket.resolvedAt }} </span>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -33,6 +33,7 @@ export class AuthService {
 
   private readonly tokenKey = 'supportops_token';
   private readonly expirationKey = 'supportops_token_expiration';
+  private readonly lastvisitedcomp = 'home';
   private readonly http = inject(HttpClient);
   private readonly platformId = inject(PLATFORM_ID);
 
@@ -40,12 +41,16 @@ export class AuthService {
 
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(
-      tap((response) => {
-        if (isPlatformBrowser(this.platformId)) {
+      tap(
+        (response) => {
+          // if (isPlatformBrowser(this.platformId)) {
+          console.log('LOGIN RESPONSE:', response);
           sessionStorage.setItem(this.tokenKey, response.token);
           sessionStorage.setItem(this.expirationKey, response.expires);
-        }
-      }),
+          sessionStorage.setItem(this.lastvisitedcomp, 'ticket-list');
+        },
+        //}
+      ),
     );
   }
 
@@ -55,6 +60,7 @@ export class AuthService {
     }
     sessionStorage.removeItem(this.tokenKey);
     sessionStorage.removeItem(this.expirationKey);
+    sessionStorage.removeItem(this.lastvisitedcomp);
   }
 
   getToken(): string | null {
@@ -78,7 +84,7 @@ export class AuthService {
     return roles.includes(currentRole);
   }
 
-  getRole(): string | null {
+  public getRole(): string | null {
     const token = this.getToken();
 
     if (!token) {
@@ -87,13 +93,13 @@ export class AuthService {
 
     try {
       const decoded = jwtDecode<JwtPayload>(token);
-
+      console.log('DECODED JWT:', decoded);
       const role =
         decoded.role ??
         (decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] as string) ??
         null;
 
-      //console.log('JWT Role:', role);
+      console.log('JWT Role:', role);
       return typeof role === 'string' ? role : null;
     } catch (error) {
       console.error('Unable to decode JWT:', error);
@@ -103,22 +109,25 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    const token = this.getToken();
-
-    if (!token) {
-      return false;
-    }
-
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
-
-      if (!decoded.exp) {
-        return false;
-      }
-
-      return decoded.exp * 1000 > Date.now();
-    } catch {
-      return false;
-    }
+    return !!this.getToken();
   }
+  // isLoggedIn(): boolean {
+  //   const token = this.getToken();
+
+  //   if (!token) {
+  //     return false;
+  //   }
+
+  //   try {
+  //     const decoded = jwtDecode<JwtPayload>(token);
+
+  //     if (!decoded.exp) {
+  //       return false;
+  //     }
+
+  //     return decoded.exp * 1000 > Date.now();
+  //   } catch {
+  //     return false;
+  //   }
+  // }
 }

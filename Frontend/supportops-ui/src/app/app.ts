@@ -23,11 +23,32 @@ export class App implements OnInit {
         console.log('API Response');
         console.log(response);
       },
-
       error: (error) => {
         console.error(error);
       },
     });
+  }
+
+  ngonchecked() {
+    console.log('Component checked');
+  }
+  ngdocheck() {
+    console.log('Component do check');
+  }
+  ngaftercontentinit() {
+    console.log('Component after content init');
+  }
+  ngaftercontentchecked() {
+    console.log('Component after content checked');
+  }
+  ngafterviewinit() {
+    console.log('Component after view init');
+  }
+  ngafterviewchecked() {
+    console.log('Component after view checked');
+  }
+  ngdestroy() {
+    console.log('Component destroyed');
   }
 
   // testLogin(): void {

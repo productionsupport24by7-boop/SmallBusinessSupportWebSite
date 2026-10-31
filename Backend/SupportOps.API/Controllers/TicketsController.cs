@@ -21,27 +21,30 @@ public class TicketsController : ControllerBase
     [HttpPost]
     [Authorize(Roles = "Customer,SupportAgent,Admin")]
     public async Task<IActionResult> Create(
-        CreateTicketRequest request)
+    CreateTicketRequest request)
     {
         var userIdClaim =
-            User.FindFirstValue(ClaimTypes.NameIdentifier);
+            User.FindFirstValue(
+                ClaimTypes.NameIdentifier);
 
-
-        Console.WriteLine(userIdClaim);
-
-        if (!int.TryParse(userIdClaim, out var customerId))
+        if (string.IsNullOrEmpty(userIdClaim))
         {
             return Unauthorized();
         }
 
-        var result = await _ticketService.CreateAsync(
-            request,
-            customerId);
+        var ticket = new CreateTicketRequest
+        {
+            Title = request.Title,
+            Description = request.Description,
+            Priority = request.Priority,
+            Category = request.Category,
 
-        return CreatedAtAction(
-            nameof(GetById),
-            new { id = result.Id },
-            result);
+        };
+
+        var result =
+            await _ticketService.CreateAsync(ticket, int.Parse(userIdClaim));
+
+        return Ok(result);
     }
 
     [HttpGet]
@@ -73,10 +76,7 @@ public class TicketsController : ControllerBase
             Console.WriteLine("Failed to parse role" + role);
             return Unauthorized();
         }
-        if (role != "Admin" && role != "SupportAgent" && role == "Customer")
-        {
 
-        }
         var ticket = await _ticketService.GetByIdAsync(id, userId, role);
 
         if (ticket == null)
@@ -121,17 +121,27 @@ public class TicketsController : ControllerBase
     }
 
     [HttpGet("my")]
-    [AllowAnonymous]
+    [Authorize(Roles = "Customer,SupportAgent,Admin")]
     public async Task<IActionResult> GetMyTickets()
     {
         var userIdClaim =
             User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var role =
+   User.FindFirstValue(ClaimTypes.Role);
 
-        foreach (var claim in User.Claims)
-        {
-            Console.WriteLine(
-                $"CLAIM: {claim.Type} = {claim.Value}");
-        }
+        Console.WriteLine($"USER ID CLAIM: {userIdClaim}");
+        Console.WriteLine($"ROLE CLAIM: {role}");
+
+        // if (!User.Identity.IsAuthenticated)
+        // {
+        //     return Unauthorized();
+        // }
+
+        // foreach (var claim in User.Claims)
+        // {
+        //     Console.WriteLine(
+        //         $"CLAIM: {claim.Type} = {claim.Value}");
+        // }
 
         if (!int.TryParse(userIdClaim, out var userId))
         {
@@ -139,9 +149,24 @@ public class TicketsController : ControllerBase
             return Unauthorized();
         }
 
-        var tickets =
-            await _ticketService.GetMyTicketsAsync(userId);
 
-        return Ok(tickets);
+        if (role == "Admin" || role == "SupportAgent")
+        {
+            // Admins and Support Agents can view all tickets
+            var alltickets = await _ticketService.GetAllAsync();
+            return Ok(alltickets);
+        }
+        else if (role == "Customer")
+        {
+            // Customers can only view their own tickets
+            var mytickets = await _ticketService.GetMyTicketsAsync(userId);
+            return Ok(mytickets);
+        }
+        else
+        {
+            return Unauthorized();
+        }
+
+
     }
 }

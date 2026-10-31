@@ -14,4 +14,5 @@ public interface ITicketRepository
     Task<bool> DeleteAsync(int id);
 
     Task<List<Ticket>> GetByCustomerIdAsync(int customerId);
+    // Task<bool> CheckUserTicketsAsync(int customerId);
 }

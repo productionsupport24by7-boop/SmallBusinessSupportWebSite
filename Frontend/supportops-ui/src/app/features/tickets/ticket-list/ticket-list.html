@@ -1,18 +1,14 @@
 <div class="ticket-container">
-
   <div class="ticket-header">
     <div>
       <h2>My Tickets</h2>
       <p>View and track your support requests.</p>
-
-          </div>
+    </div>
   </div>
 
-  <!-- @if (loading) {
-    <div class="loading">
-      Loading tickets...
-    </div>
-  } -->
+  @if (loading()) {
+    <div class="loading">Loading tickets...(loading)</div>
+  }
 
   @if (errorMessage) {
     <div class="error">
@@ -20,20 +16,16 @@
     </div>
   }
 
-  <!-- @if (!loading && !errorMessage && tickets.length === 0) { -->
-     @if (tickets.length === 0) {
+  @if (showEmptyState) {
     <div class="empty">
       <h3>No tickets found</h3>
       <p>You have not submitted any support tickets yet.</p>
     </div>
   }
 
-  @if (tickets.length > 0) {
-
+  @if (hasTickets) {
     <div class="table-wrapper">
-
       <table>
-
         <thead>
           <tr>
             <th>Ticket</th>
@@ -46,11 +38,13 @@
         </thead>
 
         <tbody>
-
           @for (ticket of tickets; track ticket.id) {
-
             <tr>
-
+              <td>
+                <button type="button" class="btn btn-primary" (click)="viewDetails(ticket)">
+                  View Details
+                </button>
+              </td>
               <td>
                 <strong>
                   {{ ticket.ticketNumber }}
@@ -76,19 +70,12 @@
               </td>
 
               <td>
-                {{ ticket.createdOn | date:'medium' }}
+                {{ ticket.createdAt | date: 'medium' }}
               </td>
-
             </tr>
-
           }
-
         </tbody>
-
       </table>
-
     </div>
-
   }
-
 </div>

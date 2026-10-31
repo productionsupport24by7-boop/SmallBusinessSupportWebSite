@@ -1,0 +1,56 @@
+.ticket-container {
+  padding: 24px;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.ticket-header h2 {
+  margin: 0;
+}
+
+.ticket-header p {
+  margin-top: 6px;
+}
+
+.ticket-header button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ticket-table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  font-weight: 600;
+}
+
+.loading,
+.empty-state,
+.error {
+  padding: 30px;
+  text-align: center;
+}
+
+.error {
+  border: 1px solid #ddd;
+}

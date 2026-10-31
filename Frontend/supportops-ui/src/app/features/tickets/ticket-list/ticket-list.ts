@@ -1,7 +1,12 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { finalize } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
+
 import { TicketService } from '../../../core/services/ticket';
 import { Ticket } from '../../../core/models/ticket';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-ticket-list',
@@ -12,34 +17,60 @@ import { Ticket } from '../../../core/models/ticket';
 })
 export class TicketList implements OnInit {
   private readonly ticketService = inject(TicketService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly lastvisitedcomp = 'home';
 
   tickets: Ticket[] = [];
-  loading = false;
+  loading = signal(false);
   errorMessage = '';
 
+  get hasTickets(): boolean {
+    return this.tickets.length > 0;
+  }
+
+  get showEmptyState(): boolean {
+    return !this.loading() && !this.errorMessage && !this.hasTickets;
+  }
+
+  get isAdminOrSupportAgent(): boolean {
+    const role = this.authService.getRole()?.toLowerCase();
+    return role === 'admin' || role === 'supportagent';
+  }
+
   ngOnInit(): void {
-    console.log('ngOnInit called for ticket');
+    sessionStorage.setItem(this.lastvisitedcomp, 'ticket-list');
     this.loadTickets();
-    console.log(this.tickets);
   }
 
   loadTickets(): void {
-    this.loading = true;
+    this.loading.set(true);
     this.errorMessage = '';
 
-    this.ticketService.getMyTickets().subscribe({
-      next: (response) => {
-        this.tickets = response;
-        this.loading = false;
-      },
+    this.ticketService
+      .getMyTickets()
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.tickets = Array.isArray(response) ? response : [];
+        },
+        error: (error: HttpErrorResponse) => {
+          this.tickets = [];
 
-      error: (error) => {
-        console.error('Unable to load tickets:', error);
+          if (error.status === 401) {
+            this.errorMessage = 'Your session has expired. Please log in again.';
+          } else if (error.status === 403) {
+            this.errorMessage = 'You are not authorized to view these tickets.';
+          } else if (error.status === 0) {
+            this.errorMessage = 'Unable to connect to the support service.';
+          } else {
+            this.errorMessage = 'Unable to load your tickets. Please try again.';
+          }
+        },
+      });
+  }
 
-        this.errorMessage = 'Unable to load your tickets. Please try again.';
-
-        this.loading = false;
-      },
-    });
+  viewDetails(ticket: Ticket): void {
+    this.router.navigate(['/tickets', ticket.id]);
   }
 }

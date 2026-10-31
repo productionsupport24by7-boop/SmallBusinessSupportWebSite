@@ -1,0 +1,154 @@
+<div class="ticket-form-container">
+
+  <div class="page-header">
+    <h2>Create Support Ticket</h2>
+    <p>
+      Tell us about the issue you are experiencing.
+    </p>
+  </div>
+
+  @if (errorMessage) {
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <form
+    [formGroup]="ticketForm"
+    (ngSubmit)="submit()">
+
+    <div class="form-group">
+
+      <label for="title">
+        Title
+      </label>
+
+      <input
+        id="title"
+        type="text"
+        formControlName="title"
+        placeholder="Enter ticket title">
+
+      @if (
+        ticketForm.controls.title.touched &&
+        ticketForm.controls.title.invalid
+      ) {
+        <div class="validation-error">
+          Title is required.
+        </div>
+      }
+
+    </div>
+
+    <div class="form-group">
+
+      <label for="category">
+        Category
+      </label>
+
+      <select
+        id="category"
+        formControlName="category">
+
+        <option value="General">
+          General
+        </option>
+
+        <option value="Application">
+          Application
+        </option>
+
+        <option value="Database">
+          Database
+        </option>
+
+        <option value="Network">
+          Network
+        </option>
+
+        <option value="Access">
+          Access / Login
+        </option>
+
+      </select>
+
+    </div>
+
+    <div class="form-group">
+
+      <label for="priority">
+        Priority
+      </label>
+
+      <select
+        id="priority"
+        formControlName="priority">
+
+        <option value="Low">
+          Low
+        </option>
+
+        <option value="Medium">
+          Medium
+        </option>
+
+        <option value="High">
+          High
+        </option>
+
+        <option value="Critical">
+          Critical
+        </option>
+
+      </select>
+
+    </div>
+
+    <div class="form-group">
+
+      <label for="description">
+        Description
+      </label>
+
+      <textarea
+        id="description"
+        rows="7"
+        formControlName="description"
+        placeholder="Describe the issue in detail">
+      </textarea>
+
+      @if (
+        ticketForm.controls.description.touched &&
+        ticketForm.controls.description.invalid
+      ) {
+        <div class="validation-error">
+          Description is required.
+        </div>
+      }
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        (click)="cancel()"
+        [disabled]="submitting">
+
+        Cancel
+
+      </button>
+
+      <button
+  type="button"
+  routerLink="/customer/tickets/create">
+
+  Create Ticket
+
+</button>
+
+    </div>
+
+  </form>
+
+</div>

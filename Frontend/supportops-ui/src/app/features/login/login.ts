@@ -1,25 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import {
-  AuthService,
-  LoginRequest
-} from '../../core/services/auth';
+import { AuthService, LoginRequest } from '../../core/services/auth';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule
-  ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
-  styleUrl: './login.css'
+  styleUrl: './login.css',
 })
-export class LoginComponent {
-
+export class LoginComponent implements OnInit {
   email = '';
   password = '';
 
@@ -27,12 +20,15 @@ export class LoginComponent {
   errorMessage = '';
 
   constructor(
-    private authService: AuthService,
-    private router: Router
+    private readonly authService: AuthService,
+    private readonly router: Router,
   ) {}
-
+  ngOnInit(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.authService.logout(); // Clear any existing session
+    }
+  }
   login(): void {
-
     this.errorMessage = '';
 
     if (!this.email || !this.password) {
@@ -44,7 +40,7 @@ export class LoginComponent {
 
     const request: LoginRequest = {
       email: this.email,
-      password: this.password
+      password: this.password,
     };
 
     this.authService.login(request).subscribe({
@@ -52,21 +48,20 @@ export class LoginComponent {
         this.isLoading = false;
 
         // Login successful
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['home']);
       },
 
-      error: error => {
+      error: (error) => {
         this.isLoading = false;
 
         if (error.status === 401) {
           this.errorMessage = 'Invalid email or password.';
         } else {
-          this.errorMessage =
-            'Unable to login. Please try again later.';
+          this.errorMessage = 'Unable to login. Please try again later.';
         }
 
         console.error('Login failed:', error);
-      }
+      },
     });
   }
 }
