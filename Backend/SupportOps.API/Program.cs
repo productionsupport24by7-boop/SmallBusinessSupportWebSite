@@ -5,13 +5,24 @@ using SupportOps.Infrastructure.DependencyInjection;
 using SupportOps.Infrastructure.Data;
 using SupportOps.Application.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-
 using SupportOps.Application.Interfaces;
 using SupportOps.Application.Services;
 using SupportOps.Infrastructure.Repositories;
 using SupportOps.API.Models;
+
+
+
+
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using SupportOps.Infrastructure.Identity;
+
+
+using SupportOps.Infrastructure.Services;
+using SupportOps.Infrastructure.Security;
 
 //create a builder for the web application
 var builder = WebApplication.CreateBuilder(args);
@@ -34,8 +45,29 @@ builder.Services.AddDbContext<SupportOpsDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+//manage identity and authentication
+builder.Services
+    .AddIdentityCore<ApplicationUser>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+
+        options.Password.RequiredLength = 8;
+        options.Password.RequireDigit = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = false;
+
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan =
+            TimeSpan.FromMinutes(15);
+    })
+    .AddRoles<IdentityRole<int>>()
+    .AddEntityFrameworkStores<SupportOpsDbContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();
 // Authentication
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+//removing below user repository service registrations 
+// builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
@@ -44,8 +76,15 @@ builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 var jwtSettings = builder.Configuration
     .GetSection("Jwt")
     .Get<JwtSettings>()!;
+
+
 builder.Services.AddSingleton(jwtSettings);
-builder.Services.AddSingleton<JwtTokenGenerator>();
+
+// he JwtTokenGenerator can remain a singleton because UserManager<ApplicationUser> is scoped and cannot be injected into a singleton.
+// Important correction: Change its registration to: This is necessary because the new token generator depends on the scoped UserManager<ApplicationUser>.
+
+// builder.Services.AddScoped<JwtTokenGenerator>();
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
 
 builder.Services
@@ -63,7 +102,9 @@ builder.Services
             ValidAudience = jwtSettings.Audience,
 
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings.Key))
+                Encoding.UTF8.GetBytes(jwtSettings.Key)),
+            NameClaimType = ClaimTypes.Name,
+            RoleClaimType = ClaimTypes.Role
         };
     });
 
@@ -106,7 +147,17 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SupportOpsDbContext>();
 
-    await DbSeeder.SeedAsync(db);
+    //changes after adding asp.net identity and authentication
+    //await DbSeeder.SeedAsync(db);
+    var userManager = scope.ServiceProvider
+    .GetRequiredService<UserManager<ApplicationUser>>();
+
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole<int>>>();
+
+    await DbSeeder.SeedAsync(db, userManager, roleManager);
+
+
 }
 
 await app.RunAsync();

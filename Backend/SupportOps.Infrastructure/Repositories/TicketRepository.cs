@@ -36,6 +36,8 @@ public class TicketRepository : ITicketRepository
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
+
+
     public async Task<bool> UpdateAsync(Ticket ticket)
     {
         _context.Tickets.Update(ticket);
@@ -60,12 +62,11 @@ public class TicketRepository : ITicketRepository
         return true;
     }
 
-    public async Task<List<Ticket>> GetByCustomerIdAsync(
-    int customerId)
+    public async Task<List<Ticket>> GetResponsibleTicketsAsync(int customerId)
     {
         return await _context.Tickets
-            .Where(x => x.CustomerId == customerId)
-            .OrderByDescending(x => x.CreatedOn)
+            .Where(x => x.AssignedToUserId == customerId || x.CustomerId == customerId)
+            .OrderByDescending(x => x.UpdatedOn ?? x.CreatedOn)
             .ToListAsync();
     }
 }

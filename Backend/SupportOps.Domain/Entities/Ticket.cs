@@ -17,7 +17,10 @@ public class Ticket
     public string Status { get; set; } = "Open";
 
     public string Category { get; set; } = "Other";
-    public string? CreatedByUserId { get; set; }
+    public int? CreatedByUserId { get; set; }
+
+    public int? UpdatedByUserId { get; set; }
+    public int? ResolvedByUserId { get; set; }
 
     public int? AssignedToUserId { get; set; }
 

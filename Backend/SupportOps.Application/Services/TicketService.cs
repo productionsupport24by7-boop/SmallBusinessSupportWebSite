@@ -26,7 +26,9 @@ public class TicketService : ITicketService
             Priority = request.Priority,
             Category = request.Category,
             Status = "Open",
-            CreatedOn = DateTime.UtcNow
+            CreatedOn = DateTime.UtcNow,
+            CreatedByUserId = customerId
+
         };
 
         await _ticketRepository.CreateAsync(ticket);
@@ -64,41 +66,148 @@ public class TicketService : ITicketService
     }
 
     public async Task<bool> UpdateAsync(
-        int id,
-        UpdateTicketRequest request)
+    int id,
+    UpdateTicketRequest request,
+    int userId,
+    string role)
     {
+
+
+        if (request.Title != null &&
+            (string.IsNullOrWhiteSpace(request.Title) ||
+             request.Title.Length > 200))
+        {
+            throw new ArgumentException("Invalid ticket title.");
+        }
+
+        if (request.Description != null &&
+            (string.IsNullOrWhiteSpace(request.Description) ||
+             request.Description.Length > 5000))
+        {
+            throw new ArgumentException("Invalid ticket description.");
+        }
+
+        var allowedPriorities = new[]
+        {
+    "Low", "Medium", "High", "Critical"
+};
+
+        var allowedStatuses = new[]
+        {
+    "Open", "In Progress", "Pending", "Resolved", "Closed"
+};
+
+        if (request.Priority != null &&
+            !allowedPriorities.Contains(
+                request.Priority, StringComparer.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Invalid ticket priority.");
+        }
+
+        if (request.Status != null &&
+            !allowedStatuses.Contains(
+                request.Status, StringComparer.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Invalid ticket status.");
+        }
+
         var ticket = await _ticketRepository.GetByIdAsync(id);
 
         if (ticket == null)
+            return false;
+
+        bool isAdmin = role.Equals(
+            "Admin", StringComparison.OrdinalIgnoreCase);
+
+        bool isAgent = role.Equals(
+            "SupportAgent", StringComparison.OrdinalIgnoreCase);
+
+        bool isCustomer = role.Equals(
+            "Customer", StringComparison.OrdinalIgnoreCase);
+
+        // Customers can only update their own open tickets.
+        if (isCustomer)
+        {
+            if (ticket.CustomerId != userId ||
+                !ticket.Status.Equals(
+                    "Open", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            // Customers may edit descriptive fields only.
+            if (request.Title != null)
+                ticket.Title = request.Title.Trim();
+
+            if (request.Description != null)
+                ticket.Description = request.Description.Trim();
+
+            if (request.Priority != null)
+                ticket.Priority = request.Priority;
+
+            if (request.Category != null)
+                ticket.Category = request.Category;
+        }
+        else if (isAgent)
+        {
+            // An agent can only update tickets assigned to them.
+            if (ticket.AssignedToUserId != userId)
+                return false;
+
+            if (request.Title != null)
+                ticket.Title = request.Title.Trim();
+
+            if (request.Description != null)
+                ticket.Description = request.Description.Trim();
+
+            if (request.Priority != null)
+                ticket.Priority = request.Priority;
+
+            if (request.Category != null)
+                ticket.Category = request.Category;
+
+            if (request.Status != null)
+                ticket.Status = request.Status;
+
+            // Agents cannot change ticket assignment.
+        }
+        else if (isAdmin)
+        {
+            if (request.Title != null)
+                ticket.Title = request.Title.Trim();
+
+            if (request.Description != null)
+                ticket.Description = request.Description.Trim();
+
+            if (request.Priority != null)
+                ticket.Priority = request.Priority;
+
+            if (request.Category != null)
+                ticket.Category = request.Category;
+
+            if (request.Status != null)
+                ticket.Status = request.Status;
+
+            if (request.AssignedToUserId.HasValue)
+                ticket.AssignedToUserId = request.AssignedToUserId;
+        }
+        else
         {
             return false;
         }
 
-        if (request.Title != null)
-            ticket.Title = request.Title;
-
-        if (request.Description != null)
-            ticket.Description = request.Description;
-
-        if (request.Priority != null)
-            ticket.Priority = request.Priority;
-
-        if (request.Status != null)
-            ticket.Status = request.Status;
-
-        if (request.Category != null)
-            ticket.Category = request.Category;
-
-        if (request.AssignedToUserId.HasValue)
-            ticket.AssignedToUserId = request.AssignedToUserId;
-
         ticket.UpdatedOn = DateTime.UtcNow;
 
-        if (ticket.Status == "Resolved" &&
-            ticket.ResolvedOn == null)
+        if (ticket.Status.Equals(
+            "Resolved", StringComparison.OrdinalIgnoreCase))
         {
-            ticket.ResolvedOn = DateTime.UtcNow;
+            ticket.ResolvedOn ??= DateTime.UtcNow;
         }
+        else
+        {
+            ticket.ResolvedOn = null;
+        }
+        ticket.UpdatedByUserId = userId;
 
         return await _ticketRepository.UpdateAsync(ticket);
     }
@@ -126,19 +235,24 @@ public class TicketService : ITicketService
             Status = ticket.Status,
             Category = ticket.Category,
             AssignedToUserId = ticket.AssignedToUserId,
+            UpdatedByUserId = ticket.UpdatedByUserId,
+            ResolvedByUserId = ticket.ResolvedByUserId,
             CreatedOn = ticket.CreatedOn,
             UpdatedOn = ticket.UpdatedOn,
             ResolvedOn = ticket.ResolvedOn
         };
     }
 
-    public async Task<List<TicketResponse>> GetMyTicketsAsync(
-    int customerId)
+
+
+
+    public async Task<List<TicketResponse>> GetResponsibleTicketsAsync(int customerId)
     {
-        var tickets = await _ticketRepository.GetByCustomerIdAsync(customerId);
+        var tickets = await _ticketRepository.GetResponsibleTicketsAsync(customerId);
 
         return tickets
             .Select(MapToResponse)
             .ToList();
+        throw new NotImplementedException();
     }
 }

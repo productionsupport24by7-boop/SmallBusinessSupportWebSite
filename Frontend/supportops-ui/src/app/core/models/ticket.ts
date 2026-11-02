@@ -8,7 +8,7 @@ export interface Ticket {
   status: string;
   category: string;
   assignedToUserId?: number | null;
-  createdAt: string;
-  updatedAt?: string | null;
-  resolvedAt?: string | null;
+  createdOn: string;
+  updatedOn?: string | null;
+  resolvedOn?: string | null;
 }

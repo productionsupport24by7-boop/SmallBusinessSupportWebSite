@@ -47,14 +47,27 @@ export class TicketList implements OnInit {
     this.loading.set(true);
     this.errorMessage = '';
 
+    console.log('Loading tickets started...');
+
     this.ticketService
       .getMyTickets()
-      .pipe(finalize(() => this.loading.set(false)))
+      .pipe(
+        finalize(() => {
+          console.log('Ticket request completed. Resetting loading...');
+          this.loading.set(false);
+        }),
+      )
       .subscribe({
         next: (response) => {
+          console.log('Tickets API response:', response);
+
           this.tickets = Array.isArray(response) ? response : [];
+
+          console.log('Tickets loaded:', this.tickets.length);
         },
         error: (error: HttpErrorResponse) => {
+          console.error('Ticket API error:', error);
+
           this.tickets = [];
 
           if (error.status === 401) {
@@ -69,7 +82,6 @@ export class TicketList implements OnInit {
         },
       });
   }
-
   viewDetails(ticket: Ticket): void {
     this.router.navigate(['/tickets', ticket.id]);
   }

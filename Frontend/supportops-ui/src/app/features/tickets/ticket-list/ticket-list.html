@@ -31,6 +31,7 @@
       <table>
         <thead>
           <tr>
+            <th>Actions</th>
             <th>Ticket</th>
             <th>Title</th>
             <th>Priority</th>
@@ -73,7 +74,7 @@
               </td>
 
               <td>
-                {{ ticket.createdAt | date: 'medium' }}
+                {{ ticket.createdOn | date: 'medium' }}
               </td>
             </tr>
           }

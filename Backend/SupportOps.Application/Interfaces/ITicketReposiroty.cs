@@ -13,6 +13,6 @@ public interface ITicketRepository
     Task<bool> UpdateAsync(Ticket ticket);
     Task<bool> DeleteAsync(int id);
 
-    Task<List<Ticket>> GetByCustomerIdAsync(int customerId);
     // Task<bool> CheckUserTicketsAsync(int customerId);
+    Task<List<Ticket>> GetResponsibleTicketsAsync(int customerId);
 }

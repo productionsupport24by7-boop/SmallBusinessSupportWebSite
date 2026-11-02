@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Ticket } from '../models/ticket';
 import { environment } from '../../../environments/environment';
 import { CreateTicketRequest } from '../models/icreate-ticket-request';
+import { IupdateTicketRequest } from '../models/iupdate-ticket-request';
 
 @Injectable({
   providedIn: 'root',
@@ -22,5 +23,8 @@ export class TicketService {
   }
   createTicket(request: CreateTicketRequest): Observable<Ticket> {
     return this.http.post<Ticket>(this.apiUrl, request);
+  }
+  updateTicket(id: number, request: IupdateTicketRequest): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}`, request);
   }
 }

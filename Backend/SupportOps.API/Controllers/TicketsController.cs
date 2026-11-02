@@ -47,14 +47,6 @@ public class TicketsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet]
-    [Authorize(Roles = "Admin,SupportAgent")]
-    public async Task<IActionResult> GetAll()
-    {
-        var tickets = await _ticketService.GetAllAsync();
-
-        return Ok(tickets);
-    }
 
 
     [HttpGet("{id:int}")]
@@ -88,21 +80,36 @@ public class TicketsController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Roles = "Admin,SupportAgent")]
+    [Authorize(Roles = "Customer,Admin,SupportAgent")]
     public async Task<IActionResult> Update(
-        int id,
-        UpdateTicketRequest request)
+     int id,
+     UpdateTicketRequest request)
     {
-        var updated = await _ticketService.UpdateAsync(
-            id,
-            request);
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var role = User.FindFirstValue(ClaimTypes.Role);
 
-        if (!updated)
+        if (!int.TryParse(userIdClaim, out var userId) ||
+            string.IsNullOrWhiteSpace(role))
         {
-            return NotFound();
+            Console.WriteLine("Failed to parse user ID" + userId);
+            Console.WriteLine("Failed to parse role" + role);
+            return Unauthorized();
         }
 
-        return NoContent();
+        try
+        {
+            var updated = await _ticketService.UpdateAsync(
+                id, request, userId, role);
+
+            if (!updated)
+                return NotFound();
+
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
 
@@ -120,6 +127,16 @@ public class TicketsController : ControllerBase
         return NoContent();
     }
 
+    // [HttpGet]
+    // [Authorize(Roles = "Admin")]
+    // public async Task<IActionResult> GetAll()
+    // {
+    //     var tickets = await _ticketService.GetAllAsync();
+
+    //     return Ok(tickets);
+    // }
+
+
     [HttpGet("my")]
     [Authorize(Roles = "Customer,SupportAgent,Admin")]
     public async Task<IActionResult> GetMyTickets()
@@ -132,16 +149,7 @@ public class TicketsController : ControllerBase
         Console.WriteLine($"USER ID CLAIM: {userIdClaim}");
         Console.WriteLine($"ROLE CLAIM: {role}");
 
-        // if (!User.Identity.IsAuthenticated)
-        // {
-        //     return Unauthorized();
-        // }
 
-        // foreach (var claim in User.Claims)
-        // {
-        //     Console.WriteLine(
-        //         $"CLAIM: {claim.Type} = {claim.Value}");
-        // }
 
         if (!int.TryParse(userIdClaim, out var userId))
         {
@@ -150,18 +158,19 @@ public class TicketsController : ControllerBase
         }
 
 
-        if (role == "Admin" || role == "SupportAgent")
+        if (role == "Admin")
         {
             // Admins and Support Agents can view all tickets
             var alltickets = await _ticketService.GetAllAsync();
             return Ok(alltickets);
         }
-        else if (role == "Customer")
+        else if (role == "SupportAgent" || role == "Customer")
         {
-            // Customers can only view their own tickets
-            var mytickets = await _ticketService.GetMyTicketsAsync(userId);
-            return Ok(mytickets);
+            //Assign ticket only visible to Agent
+            var responsibleTicket = await _ticketService.GetResponsibleTicketsAsync(userId);
+            return Ok(responsibleTicket);
         }
+
         else
         {
             return Unauthorized();

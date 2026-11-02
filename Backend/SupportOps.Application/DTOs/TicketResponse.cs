@@ -19,6 +19,8 @@ public class TicketResponse
     public string Category { get; set; } = string.Empty;
 
     public int? AssignedToUserId { get; set; }
+    public int? UpdatedByUserId { get; set; }
+    public int? ResolvedByUserId { get; set; }
 
     public DateTime CreatedOn { get; set; }
 
