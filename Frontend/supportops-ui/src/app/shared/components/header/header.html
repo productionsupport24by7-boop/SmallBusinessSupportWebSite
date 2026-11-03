@@ -15,5 +15,14 @@
   <a mat-button routerLink="/contact"> Contact </a>
   <a mat-button routerLink="/tickets"> Tickets </a>
   <button mat-raised-button color="accent">Free Consultation</button>
-  <button mat-button (click)="logout()" routerLink="/login">Logout</button>
+  <button mat-button *ngIf="isLoggedIn()" (click)="logout()" routerLink="/login">Logout</button>
+  <!-- <button mat-button-toggle *ngIf="!isLoggedIn()" routerLink="/login">Login</button> -->
+  <button
+    mat-button-toggle
+    [value]="isLoggedIn() ? 'logout' : 'login'"
+    (click)="toggleAuth()"
+    class="mdc-button mat-mdc-button-base mdc-button--raised mat-mdc-raised-button mat-accent"
+  >
+    {{ isLoggedIn() ? 'Logout' : 'Login' }}
+  </button>
 </mat-toolbar>

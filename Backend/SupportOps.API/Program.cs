@@ -72,6 +72,12 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 
+builder.Services.AddScoped<IEmailNotificationService, EmailNotificationService>();
+
+builder.Services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
+
+builder.Services.AddScoped<IEmailOutboxRepository, EmailOutboxRepository>();
+
 
 var jwtSettings = builder.Configuration
     .GetSection("Jwt")
@@ -111,6 +117,7 @@ builder.Services
 
 
 builder.Services.AddAuthorization();
+
 
 
 var app = builder.Build();

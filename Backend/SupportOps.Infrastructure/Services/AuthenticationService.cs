@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using SupportOps.Application.Interfaces;
 using SupportOps.Infrastructure.Identity;
 using SupportOps.Application.Models;
+using Microsoft.Extensions.Logging;
 
 namespace SupportOps.Infrastructure.Services;
 
@@ -12,14 +13,22 @@ public class AuthenticationService : IAuthenticationService
     private readonly RoleManager<IdentityRole<int>> _roleManager;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
+    private readonly IEmailNotificationService _emailNotificationService;
+    private readonly ILogger<AuthenticationService> _logger;
+
     public AuthenticationService(
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole<int>> roleManager,
-        IJwtTokenGenerator jwtTokenGenerator)
+        IJwtTokenGenerator jwtTokenGenerator,
+        IEmailNotificationService emailNotificationService,
+    ILogger<AuthenticationService> logger
+    )
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _emailNotificationService = emailNotificationService;
+        _logger = logger;
     }
 
     public async Task<string?> LoginAsync(
@@ -122,8 +131,34 @@ public class AuthenticationService : IAuthenticationService
             return result;
         }
 
-        result.Succeeded = true;
 
+        // Send welcome email asynchronously
+        try
+        {
+            var placeholders = new Dictionary<string, string>
+    {
+        { "FirstName", user.FirstName },
+        { "LastName", user.LastName },
+        { "Email", user.Email ?? string.Empty }
+    };
+
+            await _emailNotificationService.QueueEmailAsync(
+                "USER_REGISTRATION",
+                user.Email!,
+                placeholders);
+
+            _logger.LogInformation(
+                "Welcome email queued for {Email}", user.Email);
+        }
+        catch (Exception ex)
+        {
+            // Registration should not fail because of an email queue issue.
+            _logger.LogError(
+                ex,
+                "Failed to queue welcome email for {Email}",
+                user.Email);
+        }
+        result.Succeeded = true;
         return result;
     }
 }

@@ -31,23 +31,43 @@ public class SupportOpsDbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SupportOpsDbContext).Assembly);
         modelBuilder.Entity<EmailTemplate>(entity =>
-        {
-            entity.HasIndex(e => e.TemplateCode).IsUnique();
+{
+    entity.HasKey(e => e.Id);
 
-            entity.Property(e => e.TemplateCode)
-                .HasMaxLength(100)
-                .IsRequired();
+    entity.HasIndex(e => e.TemplateCode)
+          .IsUnique();
 
-            entity.Property(e => e.Subject)
-                .HasMaxLength(250)
-                .IsRequired();
-        });
+    entity.Property(e => e.TemplateCode)
+          .HasMaxLength(100)
+          .IsRequired();
+
+    entity.Property(e => e.Subject)
+          .HasMaxLength(250)
+          .IsRequired();
+
+    entity.Property(e => e.Body)
+          .IsRequired();
+});
 
         modelBuilder.Entity<EmailOutbox>(entity =>
         {
+            entity.HasKey(e => e.Id);
+
             entity.Property(e => e.ToEmail)
-                .HasMaxLength(250)
-                .IsRequired();
+                  .HasMaxLength(250)
+                  .IsRequired();
+
+            entity.Property(e => e.TemplateCode)
+                  .HasMaxLength(100)
+                  .IsRequired();
+
+            entity.Property(e => e.Subject)
+                  .HasMaxLength(250)
+                  .IsRequired();
+
+            entity.Property(e => e.Status)
+                  .HasMaxLength(30)
+                  .IsRequired();
 
             entity.HasIndex(e => new { e.Status, e.CreatedOn });
         });
