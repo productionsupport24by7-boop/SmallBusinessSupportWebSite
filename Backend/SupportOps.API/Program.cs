@@ -23,6 +23,7 @@ using SupportOps.Infrastructure.Identity;
 
 using SupportOps.Infrastructure.Services;
 using SupportOps.Infrastructure.Security;
+using SupportOps.Infrastructure.Email;
 
 //create a builder for the web application
 var builder = WebApplication.CreateBuilder(args);
@@ -77,6 +78,12 @@ builder.Services.AddScoped<IEmailNotificationService, EmailNotificationService>(
 builder.Services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
 
 builder.Services.AddScoped<IEmailOutboxRepository, EmailOutboxRepository>();
+
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+builder.Services.AddHostedService<EmailOutboxBackgroundService>();
 
 
 var jwtSettings = builder.Configuration
