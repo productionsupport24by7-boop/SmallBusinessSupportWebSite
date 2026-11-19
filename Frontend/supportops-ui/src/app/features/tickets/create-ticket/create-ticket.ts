@@ -21,10 +21,11 @@ export class CreateTicketComponent {
 
   submitting = false;
   errorMessage = '';
+  successMessage = '';
 
   ticketForm = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(200)]],
-    description: ['', [Validators.required, Validators.maxLength(5000)]],
+    description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(5000)]],
     priority: ['Medium', Validators.required],
     category: ['Other', Validators.required],
   });
@@ -37,6 +38,7 @@ export class CreateTicketComponent {
 
     this.submitting = true;
     this.errorMessage = '';
+    this.successMessage = '';
 
     const request: CreateTicketRequest = this.ticketForm.getRawValue();
 
@@ -45,13 +47,23 @@ export class CreateTicketComponent {
       .pipe(finalize(() => (this.submitting = false)))
       .subscribe({
         next: (ticket) => {
-          this.router.navigate(['/tickets', ticket.id]);
+          console.log('Ticket created successfully');
+          this.errorMessage = '';
+          this.successMessage = 'Ticket created successfully!';
+          void this.router.navigate(['/tickets', ticket.id]);
         },
         error: (error) => {
           console.error('Unable to create ticket:', error);
 
           if (error.status === 400) {
-            this.errorMessage = 'Please check the ticket information and try again.';
+            const errors = error.error?.errors;
+
+            if (errors) {
+              this.errorMessage = Object.values(errors).flat().join(' ');
+            } else {
+              this.errorMessage =
+                error.error?.detail || error.error?.title || 'Invalid ticket information.';
+            }
           } else if (error.status === 401) {
             this.errorMessage = 'Your session has expired. Please log in again.';
           } else if (error.status === 403) {
@@ -66,6 +78,6 @@ export class CreateTicketComponent {
   }
 
   cancel(): void {
-    this.router.navigate(['/tickets']);
+    void this.router.navigate(['/tickets']);
   }
 }

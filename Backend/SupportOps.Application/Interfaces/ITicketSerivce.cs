@@ -20,6 +20,12 @@ public interface ITicketService
     string role);
     Task<bool> DeleteAsync(int id);
 
-    Task<List<TicketResponse>> GetResponsibleTicketsAsync(int customerId);
+    Task<List<TicketResponse>> GetCustomerTicketsAsync(int customerId);
+    Task<List<TicketResponse>> GetResponsibleTicketsAsync(int agentId);
+
+    Task<bool> AssignTicketAsync(
+    int ticketId,
+    int agentId,
+    int adminUserId);
 
 }

@@ -84,6 +84,7 @@ builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpS
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 
 builder.Services.AddHostedService<EmailOutboxBackgroundService>();
+builder.Services.AddScoped<ISupportAgentService, SupportAgentService>();
 
 
 var jwtSettings = builder.Configuration

@@ -12,39 +12,83 @@ namespace SupportOps.API.Controllers;
 public class TicketsController : ControllerBase
 {
     private readonly ITicketService _ticketService;
+    private readonly ISupportAgentService _supportAgentService;
 
-    public TicketsController(ITicketService ticketService)
+    public TicketsController(ITicketService ticketService, ISupportAgentService supportAgentService)
     {
         _ticketService = ticketService;
+        _supportAgentService = supportAgentService;
     }
+
+
+    [HttpPut("{id:int}/assign")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AssignTicket(
+    int id,
+    [FromBody] AssignTicketRequest request)
+    {
+        if (request.AssignedToUserId <= 0)
+        {
+            return BadRequest(new
+            {
+                message = "A valid Support Agent must be selected."
+            });
+        }
+
+        var isSupportAgent =
+            await _supportAgentService.IsSupportAgentAsync(
+                request.AssignedToUserId);
+
+        if (!isSupportAgent)
+        {
+            return BadRequest(new
+            {
+                message = "The selected user is not an active Support Agent."
+            });
+        }
+
+        var adminIdClaim =
+            User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(adminIdClaim, out var adminId))
+            return Unauthorized();
+
+        var updated = await _ticketService.AssignTicketAsync(
+            id,
+            request.AssignedToUserId,
+            adminId);
+
+        if (!updated)
+            return NotFound(new { message = "Ticket not found." });
+
+        return NoContent();
+    }
+
 
     [HttpPost]
     [Authorize(Roles = "Customer,SupportAgent,Admin")]
     public async Task<IActionResult> Create(
-    CreateTicketRequest request)
+     [FromBody] CreateTicketRequest request)
     {
-        var userIdClaim =
-            User.FindFirstValue(
-                ClaimTypes.NameIdentifier);
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
 
-        if (string.IsNullOrEmpty(userIdClaim))
+        var userIdClaim =
+            User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized();
         }
 
-        var ticket = new CreateTicketRequest
-        {
-            Title = request.Title,
-            Description = request.Description,
-            Priority = request.Priority,
-            Category = request.Category,
+        var result = await _ticketService.CreateAsync(request, userId);
 
-        };
-
-        var result =
-            await _ticketService.CreateAsync(ticket, int.Parse(userIdClaim));
-
-        return Ok(result);
+        return CreatedAtAction(
+        nameof(GetById),
+        new { id = result.Id },
+        result);
     }
 
 
@@ -141,41 +185,30 @@ public class TicketsController : ControllerBase
     [Authorize(Roles = "Customer,SupportAgent,Admin")]
     public async Task<IActionResult> GetMyTickets()
     {
-        var userIdClaim =
-            User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var role =
-   User.FindFirstValue(ClaimTypes.Role);
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var role = User.FindFirstValue(ClaimTypes.Role);
 
-        Console.WriteLine($"USER ID CLAIM: {userIdClaim}");
-        Console.WriteLine($"ROLE CLAIM: {role}");
-
-
-
-        if (!int.TryParse(userIdClaim, out var userId))
-        {
-            Console.WriteLine("Failed to parse user ID" + userId);
-            return Unauthorized();
-        }
-
-
-        if (role == "Admin")
-        {
-            // Admins and Support Agents can view all tickets
-            var alltickets = await _ticketService.GetAllAsync();
-            return Ok(alltickets);
-        }
-        else if (role == "SupportAgent" || role == "Customer")
-        {
-            //Assign ticket only visible to Agent
-            var responsibleTicket = await _ticketService.GetResponsibleTicketsAsync(userId);
-            return Ok(responsibleTicket);
-        }
-
-        else
+        if (!int.TryParse(userIdClaim, out var userId) ||
+            string.IsNullOrWhiteSpace(role))
         {
             return Unauthorized();
         }
 
+        switch (role)
+        {
+            case "Admin":
+                return Ok(await _ticketService.GetAllAsync());
 
+            case "SupportAgent":
+                return Ok(await _ticketService.GetResponsibleTicketsAsync(userId));
+
+            case "Customer":
+                return Ok(await _ticketService.GetCustomerTicketsAsync(userId));
+
+            default:
+                return Forbid();
+        }
     }
+
+   
 }

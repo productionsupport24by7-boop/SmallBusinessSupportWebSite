@@ -17,6 +17,7 @@ public class TicketService : ITicketService
         CreateTicketRequest request,
         int customerId)
     {
+        ValidateCreateRequest(request);
         var ticket = new Ticket
         {
             TicketNumber = GenerateTicketNumber(),
@@ -188,8 +189,8 @@ public class TicketService : ITicketService
             if (request.Status != null)
                 ticket.Status = request.Status;
 
-            if (request.AssignedToUserId.HasValue)
-                ticket.AssignedToUserId = request.AssignedToUserId;
+            //if (request.AssignedToUserId.HasValue)
+            //    ticket.AssignedToUserId = request.AssignedToUserId;
         }
         else
         {
@@ -244,15 +245,85 @@ public class TicketService : ITicketService
     }
 
 
-
-
-    public async Task<List<TicketResponse>> GetResponsibleTicketsAsync(int customerId)
+    public async Task<List<TicketResponse>> GetCustomerTicketsAsync(int customerId)
     {
-        var tickets = await _ticketRepository.GetResponsibleTicketsAsync(customerId);
+        var tickets = await _ticketRepository.GetCustomerTicketsAsync(customerId);
 
         return tickets
             .Select(MapToResponse)
             .ToList();
-        throw new NotImplementedException();
     }
+
+    public async Task<List<TicketResponse>> GetResponsibleTicketsAsync(int agentId)
+    {
+        var tickets = await _ticketRepository.GetResponsibleTicketsAsync(agentId);
+
+        return tickets
+            .Select(MapToResponse)
+            .ToList();
+
+    }
+
+    private static void ValidateCreateRequest(
+       CreateTicketRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (string.IsNullOrWhiteSpace(request.Title) ||
+            request.Title.Trim().Length < 5 ||
+            request.Title.Length > 200)
+        {
+            throw new ArgumentException("Invalid ticket title.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Description) ||
+            request.Description.Trim().Length < 10 ||
+            request.Description.Length > 5000)
+        {
+            throw new ArgumentException("Invalid ticket description.");
+        }
+
+        var allowedPriorities = new[]
+        {
+        "Low", "Medium", "High", "Critical"
+    };
+
+        var allowedCategories = new[]
+        {
+        "Technical", "Application", "Database",
+        "Access", "Infrastructure", "Other"
+    };
+
+        if (!allowedPriorities.Contains(
+            request.Priority,
+            StringComparer.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Invalid ticket priority.");
+        }
+
+        if (!allowedCategories.Contains(
+            request.Category,
+            StringComparer.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Invalid ticket category.");
+        }
+    }
+
+    public async Task<bool> AssignTicketAsync(
+    int ticketId,
+    int agentId,
+    int adminUserId)
+    {
+        var ticket = await _ticketRepository.GetByIdAsync(ticketId);
+
+        if (ticket == null)
+            return false;
+
+        ticket.AssignedToUserId = agentId;
+        ticket.UpdatedByUserId = adminUserId;
+        ticket.UpdatedOn = DateTime.UtcNow;
+
+        return await _ticketRepository.UpdateAsync(ticket);
+    }
+
 }

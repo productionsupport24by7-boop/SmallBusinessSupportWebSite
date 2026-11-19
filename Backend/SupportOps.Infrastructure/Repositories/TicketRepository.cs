@@ -62,10 +62,17 @@ public class TicketRepository : ITicketRepository
         return true;
     }
 
-    public async Task<List<Ticket>> GetResponsibleTicketsAsync(int customerId)
+    public async Task<List<Ticket>> GetCustomerTicketsAsync(int customerId)
     {
         return await _context.Tickets
-            .Where(x => x.AssignedToUserId == customerId || x.CustomerId == customerId)
+            .Where(x => x.CustomerId == customerId)
+            .OrderByDescending(x => x.UpdatedOn ?? x.CreatedOn)
+            .ToListAsync();
+    }
+    public async Task<List<Ticket>> GetResponsibleTicketsAsync(int agentId)
+    {
+        return await _context.Tickets
+            .Where(x => x.AssignedToUserId == agentId)
             .OrderByDescending(x => x.UpdatedOn ?? x.CreatedOn)
             .ToListAsync();
     }

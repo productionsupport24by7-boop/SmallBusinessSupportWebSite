@@ -30,7 +30,7 @@ public class TestController : ControllerBase
         {
             Id = 1,
             FirstName = "Ishwor",
-            LastName = "Dangol",
+            LastName = "Admin",
             Email = "admin@supportops.com",
             Role = "Admin"
         };
