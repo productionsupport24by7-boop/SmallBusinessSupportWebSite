@@ -15,6 +15,7 @@ import { CreateTicketComponent } from './features/tickets/create-ticket/create-t
 import { TicketDetailsComponent } from './features/tickets/ticket-details.component/ticket-details.component';
 
 import { RegisterComponent } from './features/register/register';
+import { ProfileComponent } from './features/profile/profile';
 
 export const routes: Routes = [
   //   {
@@ -64,6 +65,11 @@ export const routes: Routes = [
   {
     path: 'customer/tickets/create',
     component: CreateTicketComponent,
+    canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
+  },
+  {
+    path: 'profile',
+    component: ProfileComponent,
     canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
   },
 

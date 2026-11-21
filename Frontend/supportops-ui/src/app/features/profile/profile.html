@@ -1,0 +1,103 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div>
+      <h2>My Profile</h2>
+      <p>View and manage your account information.</p>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-message">Loading your profile...</div>
+  } @else if (profile) {
+    <div class="profile-card">
+      <div class="profile-avatar">{{ firstName.charAt(0) }}{{ lastName.charAt(0) }}</div>
+
+      <div class="profile-name">
+        <h3>{{ firstName }} {{ lastName }}</h3>
+        <span>{{ profile.roles.join(', ') }}</span>
+      </div>
+
+      @if (errorMessage) {
+        <div class="alert error" role="alert">
+          {{ errorMessage }}
+        </div>
+      }
+
+      @if (successMessage) {
+        <div class="alert success" role="status">
+          {{ successMessage }}
+        </div>
+      }
+
+      <form #profileForm="ngForm" (ngSubmit)="updateProfile()">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input
+            id="firstName"
+            name="firstName"
+            type="text"
+            [(ngModel)]="firstName"
+            required
+            maxlength="100"
+            #firstNameInput="ngModel"
+          />
+
+          @if (firstNameInput.invalid && firstNameInput.touched) {
+            <small class="field-error"> First name is required. </small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input
+            id="lastName"
+            name="lastName"
+            type="text"
+            [(ngModel)]="lastName"
+            required
+            maxlength="100"
+            #lastNameInput="ngModel"
+          />
+
+          @if (lastNameInput.invalid && lastNameInput.touched) {
+            <small class="field-error"> Last name is required. </small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input id="email" type="email" [value]="profile.email" disabled />
+          <small>Email address cannot be changed here.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input
+            id="phoneNumber"
+            name="phoneNumber"
+            type="tel"
+            [(ngModel)]="phoneNumber"
+            maxlength="20"
+            placeholder="Enter phone number"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="role">Assigned Role</label>
+          <input id="role" type="text" [value]="profile.roles.join(', ')" disabled />
+          <small>Contact an administrator to change your role.</small>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="profileForm.invalid || isSaving()">
+            {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  } @else if (errorMessage) {
+    <div class="alert error" role="alert">
+      {{ errorMessage }}
+    </div>
+  }
+</div>
