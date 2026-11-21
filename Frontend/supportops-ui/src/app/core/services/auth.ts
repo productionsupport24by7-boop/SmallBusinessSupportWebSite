@@ -15,6 +15,18 @@ export interface LoginResponse {
   expires: string;
 }
 
+export interface RegisterRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+}
+
 interface JwtPayload {
   sub?: string;
   email?: string;
@@ -130,4 +142,8 @@ export class AuthService {
   //     return false;
   //   }
   // }
+
+  register(request: RegisterRequest): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, request);
+  }
 }

@@ -14,6 +14,8 @@ import { CreateTicketComponent } from './features/tickets/create-ticket/create-t
 
 import { TicketDetailsComponent } from './features/tickets/ticket-details.component/ticket-details.component';
 
+import { RegisterComponent } from './features/register/register';
+
 export const routes: Routes = [
   //   {
   //   path: 'users',
@@ -77,6 +79,7 @@ export const routes: Routes = [
   },
 
   { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
   {
     path: '**',
     redirectTo: '',

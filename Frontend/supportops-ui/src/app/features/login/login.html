@@ -1,18 +1,13 @@
 <div class="login-page">
-
   <div class="login-card">
-
     <div class="login-header">
       <h1>SupportOps</h1>
       <p>Production Support Portal</p>
     </div>
 
     <form (ngSubmit)="login()">
-
       <div class="form-group">
-        <label for="email">
-          Email
-        </label>
+        <label for="email"> Email </label>
 
         <input
           id="email"
@@ -21,13 +16,12 @@
           [(ngModel)]="email"
           placeholder="Enter your email"
           autocomplete="email"
-          required>
+          required
+        />
       </div>
 
       <div class="form-group">
-        <label for="password">
-          Password
-        </label>
+        <label for="password"> Password </label>
 
         <input
           id="password"
@@ -36,7 +30,8 @@
           [(ngModel)]="password"
           placeholder="Enter your password"
           autocomplete="current-password"
-          required>
+          required
+        />
       </div>
 
       @if (errorMessage) {
@@ -45,20 +40,17 @@
         </div>
       }
 
-      <button
-        type="submit"
-        [disabled]="isLoading">
-
+      <button type="submit" [disabled]="isLoading">
         @if (isLoading) {
           Signing in...
         } @else {
           Sign In
         }
-
       </button>
-
     </form>
-
+    <div class="register-link">
+      Don't have an account?
+      <a routerLink="/register">Create an Account</a>
+    </div>
   </div>
-
 </div>

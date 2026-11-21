@@ -78,3 +78,14 @@ button:disabled {
   background: #ffebee;
   color: #c62828;
 }
+.register-link {
+  margin-top: 22px;
+  text-align: center;
+  color: #666;
+}
+
+.register-link a {
+  color: #1976d2;
+  font-weight: 600;
+  text-decoration: none;
+}
