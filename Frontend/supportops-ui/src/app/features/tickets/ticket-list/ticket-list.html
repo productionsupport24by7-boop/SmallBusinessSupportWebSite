@@ -1,16 +1,27 @@
 <div class="ticket-container">
   <div class="ticket-header">
     <div>
-      <h2>My Tickets</h2>
-      <p>View and track your support requests.</p>
+      <h2>{{ isAdmin ? 'Ticket Management' : 'My Tickets' }}</h2>
+      <p>
+        {{
+          isAdmin
+            ? 'View, manage, and assign customer support tickets.'
+            : 'View and track your support requests.'
+        }}
+      </p>
     </div>
-  </div>
-  <div>
-    <button type="button" class="btn btn-primary" (click)="createTicket()">Create Ticket</button>
+
+    @if (!isAdmin) {
+      <button type="button" class="btn btn-primary" (click)="createTicket()">Create Ticket</button>
+    }
   </div>
 
   @if (loading()) {
-    <div class="loading">Loading tickets...(loading)</div>
+    <div class="loading">Loading tickets...</div>
+  }
+
+  @if (agentsLoading()) {
+    <div class="loading">Loading Support Agents...</div>
   }
 
   @if (errorMessage) {
@@ -19,10 +30,28 @@
     </div>
   }
 
+  @if (assignmentError) {
+    <div class="error">
+      {{ assignmentError }}
+    </div>
+  }
+
+  @if (assignmentSuccess) {
+    <div class="success">
+      {{ assignmentSuccess }}
+    </div>
+  }
+
   @if (showEmptyState) {
     <div class="empty">
       <h3>No tickets found</h3>
-      <p>You have not submitted any support tickets yet.</p>
+      <p>
+        {{
+          isAdmin
+            ? 'There are currently no support tickets.'
+            : 'You have not submitted any support tickets yet.'
+        }}
+      </p>
     </div>
   }
 
@@ -38,6 +67,11 @@
             <th>Category</th>
             <th>Status</th>
             <th>Created</th>
+
+            @if (isAdmin) {
+              <th>Assigned Agent</th>
+              <th>Assignment</th>
+            }
           </tr>
         </thead>
 
@@ -49,23 +83,20 @@
                   View Details
                 </button>
               </td>
-              <td>
-                <strong>
-                  {{ ticket.ticketNumber }}
-                </strong>
-              </td>
 
               <td>
-                {{ ticket.title }}
+                <strong>{{ ticket.ticketNumber }}</strong>
               </td>
 
-              <td>
-                {{ ticket.priority }}
-              </td>
+              <td>{{ ticket.title }}</td>
 
               <td>
-                {{ ticket.category }}
+                <span class="priority" [ngClass]="ticket.priority.toLowerCase()">
+                  {{ ticket.priority }}
+                </span>
               </td>
+
+              <td>{{ ticket.category }}</td>
 
               <td>
                 <span class="status">
@@ -73,9 +104,46 @@
                 </span>
               </td>
 
-              <td>
-                {{ ticket.createdOn | date: 'medium' }}
-              </td>
+              <td>{{ ticket.createdOn | date: 'medium' }}</td>
+
+              @if (isAdmin) {
+                <td>
+                  {{ getAgentName(ticket.assignedToUserId) }}
+                </td>
+
+                <td>
+                  <div class="assignment-control">
+                    <select
+                      [value]="selectedAgentIds[ticket.id] ?? ''"
+                      (change)="onAgentSelectionChange(ticket.id, $event)"
+                      [disabled]="agentsLoading()"
+                    >
+                      <option value="">Select Agent</option>
+
+                      @for (agent of supportAgents; track agent.id) {
+                        <option [value]="agent.id">
+                          {{ agent.firstName }} {{ agent.lastName }}
+                        </option>
+                      }
+                    </select>
+
+                    <button
+                      type="button"
+                      class="btn btn-assign"
+                      [disabled]="isAssignDisabled(ticket)"
+                      (click)="assignTicket(ticket)"
+                    >
+                      {{
+                        assigningTicketId() === ticket.id
+                          ? 'Saving...'
+                          : ticket.assignedToUserId
+                            ? 'Reassign'
+                            : 'Assign'
+                      }}
+                    </button>
+                  </div>
+                </td>
+              }
             </tr>
           }
         </tbody>

@@ -8,6 +8,8 @@ import { TicketService } from '../../../core/services/ticket';
 import { Ticket } from '../../../core/models/ticket';
 import { AuthService } from '../../../core/services/auth';
 
+import { SupportAgent } from '../../../core/models/isupport-agent';
+
 @Component({
   selector: 'app-ticket-list',
   standalone: true,
@@ -22,8 +24,14 @@ export class TicketList implements OnInit {
   private readonly lastvisitedcomp = 'home';
 
   tickets: Ticket[] = [];
+  supportAgents: SupportAgent[] = [];
+  selectedAgentIds: Record<number, number | null> = {};
+  agentsLoading = signal(false);
+  assigningTicketId = signal<number | null>(null);
   loading = signal(false);
   errorMessage = '';
+  assignmentError = '';
+  assignmentSuccess = '';
 
   get hasTickets(): boolean {
     return this.tickets.length > 0;
@@ -33,6 +41,9 @@ export class TicketList implements OnInit {
     return !this.loading() && !this.errorMessage && !this.hasTickets;
   }
 
+  get isAdmin(): boolean {
+    return this.authService.getRole()?.toLowerCase() === 'admin';
+  }
   get isAdminOrSupportAgent(): boolean {
     const role = this.authService.getRole()?.toLowerCase();
     return role === 'admin' || role === 'supportagent';
@@ -41,6 +52,9 @@ export class TicketList implements OnInit {
   ngOnInit(): void {
     sessionStorage.setItem(this.lastvisitedcomp, 'ticket-list');
     this.loadTickets();
+    if (this.isAdmin) {
+      this.loadSupportAgents();
+    }
   }
 
   loadTickets(): void {
@@ -62,6 +76,11 @@ export class TicketList implements OnInit {
           console.log('Tickets API response:', response);
 
           this.tickets = Array.isArray(response) ? response : [];
+          this.selectedAgentIds = {};
+
+          for (const ticket of this.tickets) {
+            this.selectedAgentIds[ticket.id] = ticket.assignedToUserId ?? null;
+          }
 
           console.log('Tickets loaded:', this.tickets.length);
         },
@@ -82,11 +101,98 @@ export class TicketList implements OnInit {
         },
       });
   }
+  loadSupportAgents(): void {
+    this.agentsLoading.set(true);
+
+    this.ticketService
+      .getSupportAgents()
+      .pipe(finalize(() => this.agentsLoading.set(false)))
+      .subscribe({
+        next: (response) => {
+          this.supportAgents = Array.isArray(response) ? response : [];
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error('Unable to load Support Agents:', error);
+          this.assignmentError = 'Unable to load Support Agents. Please refresh the page.';
+        },
+      });
+  }
+
+  onAgentSelectionChange(ticketId: number, event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const agentId = Number(select.value);
+
+    this.selectedAgentIds[ticketId] = agentId > 0 ? agentId : null;
+
+    this.assignmentError = '';
+    this.assignmentSuccess = '';
+  }
+
+  isAssignDisabled(ticket: Ticket): boolean {
+    const selectedAgentId = this.selectedAgentIds[ticket.id];
+
+    return (
+      !selectedAgentId ||
+      selectedAgentId === (ticket.assignedToUserId ?? null) ||
+      this.assigningTicketId() === ticket.id
+    );
+  }
+
+  assignTicket(ticket: Ticket): void {
+    const agentId = this.selectedAgentIds[ticket.id];
+
+    if (!agentId) {
+      this.assignmentError = 'Please select a Support Agent.';
+      return;
+    }
+
+    this.assignmentError = '';
+    this.assignmentSuccess = '';
+    this.assigningTicketId.set(ticket.id);
+
+    this.ticketService
+      .assignTicket(ticket.id, agentId)
+      .pipe(finalize(() => this.assigningTicketId.set(null)))
+      .subscribe({
+        next: () => {
+          ticket.assignedToUserId = agentId;
+
+          const agent = this.supportAgents.find((item) => item.id === agentId);
+
+          this.assignmentSuccess =
+            `Ticket ${ticket.ticketNumber} assigned to ` +
+            `${agent?.firstName ?? ''} ${agent?.lastName ?? ''}.`;
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error('Ticket assignment failed:', error);
+
+          if (error.status === 401) {
+            this.assignmentError = 'Your session has expired. Please log in again.';
+          } else if (error.status === 403) {
+            this.assignmentError = 'You are not authorized to assign tickets.';
+          } else {
+            this.assignmentError =
+              error.error?.message || 'Unable to assign ticket. Please try again.';
+          }
+        },
+      });
+  }
+
+  getAgentName(agentId?: number | null): string {
+    if (!agentId) {
+      return 'Unassigned';
+    }
+
+    const agent = this.supportAgents.find((item) => item.id === agentId);
+
+    return agent ? `${agent.firstName} ${agent.lastName}` : 'Assigned Agent';
+  }
+
   viewDetails(ticket: Ticket): void {
-    this.router.navigate(['/tickets', ticket.id]);
+    void this.router.navigate(['/tickets', ticket.id]);
   }
 
   createTicket(): void {
-    this.router.navigate(['/customer/tickets/create']);
+    void this.router.navigate(['/customer/tickets/create']);
   }
 }
