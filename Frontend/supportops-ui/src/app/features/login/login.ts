@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,7 +17,7 @@ export class LoginComponent implements OnInit {
   email = '';
   password = '';
 
-  isLoading = false;
+  isLoading = signal(false);
   errorMessage = '';
 
   constructor(
@@ -37,7 +37,7 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     const request: LoginRequest = {
       email: this.email,
@@ -46,14 +46,14 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(request).subscribe({
       next: () => {
-        this.isLoading = false;
+        this.isLoading.set(false);
 
         // Login successful
-        this.router.navigate(['home']);
+        void this.router.navigate(['home']);
       },
 
       error: (error) => {
-        this.isLoading = false;
+        this.isLoading.set(false);
 
         if (error.status === 401) {
           this.errorMessage = 'Invalid email or password.';

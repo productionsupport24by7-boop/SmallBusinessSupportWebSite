@@ -40,8 +40,8 @@
         </div>
       }
 
-      <button type="submit" [disabled]="isLoading">
-        @if (isLoading) {
+      <button type="submit" [disabled]="isLoading()">
+        @if (isLoading()) {
           Signing in...
         } @else {
           Sign In

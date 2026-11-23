@@ -55,4 +55,35 @@ public class UserProfileService : IUserProfileService
 
         return result.Succeeded;
     }
+
+    public async Task<ChangePasswordResult> ChangePasswordAsync(
+      int userId,
+      ChangePasswordRequest request)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+
+        if (user == null)
+        {
+            return new ChangePasswordResult
+            {
+                Succeeded = false,
+                Errors = ["User account was not found."]
+            };
+        }
+
+        var result = await _userManager.ChangePasswordAsync(
+            user,
+            request.CurrentPassword,
+            request.NewPassword);
+
+        return new ChangePasswordResult
+        {
+            Succeeded = result.Succeeded,
+            Errors = result.Errors
+                .Select(error => error.Description)
+                .ToList()
+        };
+    }
+
+
 }

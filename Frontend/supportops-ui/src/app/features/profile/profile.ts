@@ -2,14 +2,14 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-
+import { RouterLink } from '@angular/router';
 import { UserProfileService } from '../../core/services/user-profile.service';
 import { UserProfile, UpdateUserProfileRequest } from '../../core/models/UserProfile';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })

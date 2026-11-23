@@ -19,4 +19,12 @@ export class UserProfileService {
   updateMyProfile(request: UpdateUserProfileRequest): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/me`, request);
   }
+
+  changePassword(request: {
+    currentPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+  }): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/me/change-password`, request);
+  }
 }

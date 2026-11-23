@@ -15,6 +15,7 @@
       <div class="profile-name">
         <h3>{{ firstName }} {{ lastName }}</h3>
         <span>{{ profile.roles.join(', ') }}</span>
+        <span><br /><a routerLink="/change-password">Change Password</a></span>
       </div>
 
       @if (errorMessage) {

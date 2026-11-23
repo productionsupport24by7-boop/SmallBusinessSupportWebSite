@@ -16,6 +16,7 @@ import { TicketDetailsComponent } from './features/tickets/ticket-details.compon
 
 import { RegisterComponent } from './features/register/register';
 import { ProfileComponent } from './features/profile/profile';
+import { ChangePasswordComponent } from './features/change-password/change-password';
 
 export const routes: Routes = [
   //   {
@@ -70,6 +71,12 @@ export const routes: Routes = [
   {
     path: 'profile',
     component: ProfileComponent,
+    canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
+  },
+
+  {
+    path: 'change-password',
+    component: ChangePasswordComponent,
     canActivate: [roleGuard(['Admin', 'SupportAgent', 'Customer'])],
   },
 
