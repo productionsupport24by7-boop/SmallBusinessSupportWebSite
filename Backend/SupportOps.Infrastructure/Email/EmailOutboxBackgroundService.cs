@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SupportOps.Application.Interfaces;
 using SupportOps.Infrastructure.Data;
 
@@ -12,16 +13,18 @@ public class EmailOutboxBackgroundService : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<EmailOutboxBackgroundService> _logger;
+    private readonly IOptionsMonitor<EmailOutboxOptions> _options;
 
     private const int MaxRetryCount = 5;
     private const int BatchSize = 10;
 
     public EmailOutboxBackgroundService(
         IServiceScopeFactory scopeFactory,
-        ILogger<EmailOutboxBackgroundService> logger)
+        ILogger<EmailOutboxBackgroundService> logger, IOptionsMonitor<EmailOutboxOptions> options)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
+        _options = options;
     }
 
     protected override async Task ExecuteAsync(
@@ -31,6 +34,20 @@ public class EmailOutboxBackgroundService : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            var settings = _options.CurrentValue;
+
+            if (!settings.Enabled)
+            {
+                _logger.LogInformation(
+                    "Email processing is disabled.");
+
+                await Task.Delay(
+                    TimeSpan.FromSeconds(10),
+                    stoppingToken);
+
+                continue;
+            }
+
             try
             {
                 await ProcessPendingEmailsAsync(stoppingToken);
@@ -45,7 +62,8 @@ public class EmailOutboxBackgroundService : BackgroundService
                 _logger.LogError(ex, "Unexpected error in email outbox worker.");
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(
+                Math.Max(1, settings.PollingIntervalSeconds)), stoppingToken);
         }
 
         _logger.LogInformation("Email outbox worker stopped.");

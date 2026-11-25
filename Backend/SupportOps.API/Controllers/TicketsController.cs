@@ -13,11 +13,13 @@ public class TicketsController : ControllerBase
 {
     private readonly ITicketService _ticketService;
     private readonly ISupportAgentService _supportAgentService;
+    private readonly ITicketActivityService _ticketActivityService;
 
-    public TicketsController(ITicketService ticketService, ISupportAgentService supportAgentService)
+    public TicketsController(ITicketService ticketService, ISupportAgentService supportAgentService, ITicketActivityService ticketActivityService   )
     {
         _ticketService = ticketService;
         _supportAgentService = supportAgentService;
+        _ticketActivityService = ticketActivityService;
     }
 
 
@@ -210,5 +212,39 @@ public class TicketsController : ControllerBase
         }
     }
 
-   
+    [HttpGet("{id:int}/activities")]
+    [Authorize(Roles = "Admin,Customer,SupportAgent")]
+    public async Task<IActionResult> GetTicketActivities(
+    int id,
+    CancellationToken cancellationToken)
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var role = User.FindFirstValue(ClaimTypes.Role);
+
+        if (!int.TryParse(userIdClaim, out var userId) ||
+            string.IsNullOrWhiteSpace(role))
+        {
+            return Unauthorized();
+        }
+
+        // Verify that this user is allowed to access this ticket.
+        var ticket = await _ticketService.GetByIdAsync(
+            id,
+            userId,
+            role);
+
+        if (ticket == null)
+        {
+            // Do not disclose whether an inaccessible ticket exists.
+            return NotFound();
+        }
+
+        var activities = await _ticketActivityService.GetActivitiesAsync(
+            id,
+            cancellationToken);
+
+        return Ok(activities);
+    }
+
+
 }

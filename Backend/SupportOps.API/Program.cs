@@ -1,29 +1,26 @@
 
-using Microsoft.EntityFrameworkCore;
-using SupportOps.API.Configuration;
-using SupportOps.Infrastructure.DependencyInjection;
-using SupportOps.Infrastructure.Data;
-using SupportOps.Application.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using SupportOps.Application.Interfaces;
-using SupportOps.Application.Services;
-using SupportOps.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using SupportOps.API.Configuration;
 using SupportOps.API.Models;
-
-
-
-
+using SupportOps.Application.Interfaces;
+using SupportOps.Application.Security;
+using SupportOps.Application.Services;
+using SupportOps.Infrastructure.AI;
+using SupportOps.Infrastructure.Data;
+using SupportOps.Infrastructure.DependencyInjection;
+using SupportOps.Infrastructure.Email;
+using SupportOps.Infrastructure.Identity;
+using SupportOps.Infrastructure.Repositories;
+using SupportOps.Infrastructure.Security;
+using SupportOps.Infrastructure.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using SupportOps.Infrastructure.Identity;
+using Microsoft.Extensions.Configuration;
 
-
-using SupportOps.Infrastructure.Services;
-using SupportOps.Infrastructure.Security;
-using SupportOps.Infrastructure.Email;
 
 //create a builder for the web application
 var builder = WebApplication.CreateBuilder(args);
@@ -86,6 +83,15 @@ builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddHostedService<EmailOutboxBackgroundService>();
 builder.Services.AddScoped<ISupportAgentService, SupportAgentService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddScoped<ISupportAgentService, SupportAgentService>();
+builder.Services.Configure<OllamaOptions>(builder.Configuration.GetSection(OllamaOptions.SectionName));
+
+builder.Services.AddScoped<IAIService, OllamaAIService>();
+builder.Services.AddHttpClient<IAIService, OllamaAIService>();
+builder.Services.AddHttpClient<IAIAgentOrchestrator, SupportOpsAIAgentService>();
+
+builder.Services.Configure<EmailOutboxOptions>( builder.Configuration.GetSection(  EmailOutboxOptions.SectionName));
+builder.Services.AddHostedService<EmailOutboxBackgroundService>();
 
 
 var jwtSettings = builder.Configuration

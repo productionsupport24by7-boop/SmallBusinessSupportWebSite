@@ -1,3 +1,4 @@
+
 namespace SupportOps.Domain.Entities;
 
 public class Ticket
@@ -17,16 +18,25 @@ public class Ticket
     public string Status { get; set; } = "Open";
 
     public string Category { get; set; } = "Other";
+
     public int? CreatedByUserId { get; set; }
 
     public int? UpdatedByUserId { get; set; }
+
     public int? ResolvedByUserId { get; set; }
 
     public int? AssignedToUserId { get; set; }
+
+    // Resolution information
+    public string? ResolutionDescription { get; set; }
 
     public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedOn { get; set; }
 
     public DateTime? ResolvedOn { get; set; }
+
+    // Ticket activity history
+    public ICollection<TicketActivity> Activities { get; set; }
+        = new List<TicketActivity>();
 }

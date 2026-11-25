@@ -13,4 +13,5 @@ public class UpdateTicketRequest
     public string? Category { get; set; }
 
     public int? AssignedToUserId { get; set; }
+    public string? ResolutionDescription { get; set;  }
 }

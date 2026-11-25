@@ -25,9 +25,9 @@
       }
 
       @if (successMessage) {
-        <div class="alert success" role="status">
+        <output class="alert success">
           {{ successMessage }}
-        </div>
+        </output>
       }
 
       <form #profileForm="ngForm" (ngSubmit)="updateProfile()">

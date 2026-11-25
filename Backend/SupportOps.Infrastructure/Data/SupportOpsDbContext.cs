@@ -25,6 +25,7 @@ public class SupportOpsDbContext
     public DbSet<EmailTemplate> EmailTemplates { get; set; }
 
     public DbSet<EmailOutbox> EmailOutbox { get; set; }
+    public DbSet<TicketActivity> TicketActivities => Set<TicketActivity>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
