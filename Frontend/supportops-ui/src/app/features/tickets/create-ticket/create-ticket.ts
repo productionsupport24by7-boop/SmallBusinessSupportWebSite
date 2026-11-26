@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
-import { TicketService } from '../../../core/services/ticket';
+import { TicketService } from '../../../core/services/ticket.service';
 import { CreateTicketRequest } from '../../../core/models/icreate-ticket-request';
 
 @Component({

@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { CreateTicketRequest } from '../models/icreate-ticket-request';
 import { IupdateTicketRequest } from '../models/iupdate-ticket-request';
 import { SupportAgent } from '../models/isupport-agent';
+import { TicketActivity } from '../models/iticket-activity.model';
 
 @Injectable({
   providedIn: 'root',
@@ -38,5 +39,8 @@ export class TicketService {
   // Assign or reassign a ticket. Admin only.
   assignTicket(ticketId: number, agentId: number): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${ticketId}/assign`, { assignedToUserId: agentId });
+  }
+  getTicketActivities(ticketId: number): Observable<TicketActivity[]> {
+    return this.http.get<TicketActivity[]>(`${this.apiUrl}/${ticketId}/activities`);
   }
 }

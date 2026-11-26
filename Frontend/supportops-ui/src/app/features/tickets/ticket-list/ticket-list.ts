@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { TicketService } from '../../../core/services/ticket';
+import { TicketService } from '../../../core/services/ticket.service';
 import { Ticket } from '../../../core/models/ticket';
 import { AuthService } from '../../../core/services/auth';
 

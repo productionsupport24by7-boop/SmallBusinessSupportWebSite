@@ -157,13 +157,7 @@ public class TicketService : ITicketService
             throw new ArgumentException("Invalid ticket category.");
         }
 
-        if (request.ResolutionDescription != null &&
-            (string.IsNullOrWhiteSpace(request.ResolutionDescription) ||
-             request.ResolutionDescription.Trim().Length > 4000))
-        {
-            throw new ArgumentException(
-                "Resolution description must be between 1 and 4000 characters.");
-        }
+     
 
         var ticket = await _ticketRepository.GetByIdAsync(id);
 
@@ -191,7 +185,7 @@ public class TicketService : ITicketService
 
             // Customers cannot change operational or resolution fields.
             if (request.Status != null ||
-                request.ResolutionDescription != null)
+                string.IsNullOrEmpty(request.ResolutionDescription) == false)
             {
                 return false;
             }
@@ -208,6 +202,31 @@ public class TicketService : ITicketService
         }
 
         var changes = new List<TicketFieldChange>();
+
+        //if (request.ResolutionDescription != null &&
+        // (string.IsNullOrWhiteSpace(request.ResolutionDescription) ||
+        //  request.ResolutionDescription.Trim().Length > 4000))
+        //{
+        //    throw new ArgumentException(
+        //        "Resolution description must be between 1 and 4000 characters.");
+        //}
+
+        // Normalize optional resolution description.
+        if (string.IsNullOrWhiteSpace(request.ResolutionDescription))
+        {
+            request.ResolutionDescription = null;
+        }
+        else
+        {
+            request.ResolutionDescription =
+                request.ResolutionDescription.Trim();
+
+            if (request.ResolutionDescription.Length > 4000)
+            {
+                throw new ArgumentException(
+                    "Resolution description cannot exceed 4000 characters.");
+            }
+        }
 
         // Track and apply descriptive field changes.
         if (request.Title != null)

@@ -17,7 +17,7 @@
   }
 
   @if (!loading() && ticket(); as currentTicket) {
-    @if (!editing) {
+    @if (!editing()) {
       <div class="ticket-card">
         <div class="ticket-header">
           <div>
@@ -81,6 +81,12 @@
             <span>{{ currentTicket.resolvedOn | date: 'medium' }}</span>
           </div>
         }
+        @if (currentTicket.resolutionDescription) {
+          <div class="resolution-description">
+            <label>Resolution Details</label>
+            <p>{{ currentTicket.resolutionDescription }}</p>
+          </div>
+        }
 
         @if (canEdit) {
           <div class="form-actions">
@@ -90,7 +96,7 @@
       </div>
     }
 
-    @if (editing) {
+    @if (editing()) {
       <div class="ticket-card edit-card">
         <h3>Edit Ticket — {{ currentTicket.ticketNumber }}</h3>
 
@@ -145,7 +151,7 @@
           ) {
             <div class="form-group">
               <label for="status">Status</label>
-              <select id="status" formControlName="status">
+              <select id="status" formControlName="status" (change)="onStatusChange()">
                 <option value="Open">Open</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Pending">Pending</option>
@@ -155,17 +161,103 @@
             </div>
           }
 
+          @if (
+            authService.getRole()?.toLowerCase() === 'admin' ||
+            (authService.getRole()?.toLowerCase() === 'supportagent' &&
+              editForm.controls.status.value === 'Resolved')
+          ) {
+            <div class="form-group">
+              <label for="resolutionDescription">
+                Resolution Details <span class="required">*</span>
+              </label>
+
+              <textarea
+                id="resolutionDescription"
+                rows="5"
+                formControlName="resolutionDescription"
+                placeholder="Describe the root cause, solution implemented, and verification performed..."
+              ></textarea>
+
+              @if (
+                editForm.controls.resolutionDescription.touched &&
+                editForm.controls.resolutionDescription.hasError('required')
+              ) {
+                <small class="validation-error">
+                  Resolution details are required when resolving a ticket.
+                </small>
+              }
+
+              @if (editForm.controls.resolutionDescription.hasError('maxlength')) {
+                <small class="validation-error">
+                  Resolution details cannot exceed 4000 characters.
+                </small>
+              }
+            </div>
+          }
+
           <div class="form-actions">
-            <button type="submit" class="save-button" [disabled]="saving">
-              {{ saving ? 'Saving...' : 'Save Changes' }}
+            <button type="submit" class="save-button" [disabled]="saving()">
+              {{ saving() ? 'Saving...' : 'Save Changes' }}
             </button>
 
-            <button type="button" class="cancel-button" (click)="cancelEdit()" [disabled]="saving">
+            <button
+              type="button"
+              class="cancel-button"
+              (click)="cancelEdit()"
+              [disabled]="saving()"
+            >
               Cancel
             </button>
           </div>
         </form>
       </div>
+      <section class="activity-section">
+        <h2>Ticket Activity</h2>
+
+        @if (activityLoading()) {
+          <p>Loading activity history...</p>
+        } @else if (activityError()) {
+          <p class="error-message">{{ activityError() }}</p>
+        } @else if (activities().length === 0) {
+          <p>No activity history available.</p>
+        } @else {
+          <div class="activity-timeline">
+            @for (activity of activities(); track activity.id) {
+              <div class="activity-item">
+                <div class="activity-marker"></div>
+
+                <div class="activity-content">
+                  <h4>
+                    {{ activity.activityType }}
+                    @if (activity.fieldName) {
+                      - {{ activity.fieldName }}
+                    }
+                  </h4>
+
+                  <div class="activity-meta">
+                    <strong>{{ activity.changedByName }}</strong>
+                    <span>
+                      {{ activity.createdOn | date: 'medium' }}
+                    </span>
+                  </div>
+
+                  @if (activity.oldValue !== null || activity.newValue !== null) {
+                    <p class="activity-change">
+                      <span>{{ activity.oldValue ?? 'None' }}</span>
+                      →
+                      <span>{{ activity.newValue ?? 'None' }}</span>
+                    </p>
+                  }
+
+                  @if (activity.comment) {
+                    <p>{{ activity.comment }}</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
     }
   }
 </div>

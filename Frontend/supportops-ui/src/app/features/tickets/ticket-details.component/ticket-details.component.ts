@@ -4,10 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 
-import { TicketService } from '../../../core/services/ticket';
+import { TicketService } from '../../../core/services/ticket.service';
 import { AuthService } from '../../../core/services/auth';
 import { Ticket } from '../../../core/models/ticket';
 import { IupdateTicketRequest } from '../../../core/models/iupdate-ticket-request';
+import { TicketActivity } from '../../../core/models/iticket-activity.model';
 
 @Component({
   selector: 'app-ticket-details.component',
@@ -27,8 +28,12 @@ export class TicketDetailsComponent implements OnInit {
   // loading = true;
   ticket = signal<Ticket | null>(null);
   loading = signal(true);
-  saving = false;
-  editing = false;
+  saving = signal(false);
+  editing = signal(false);
+  //ticket activities: TicketActivity[] = [];
+  activities = signal<TicketActivity[]>([]);
+  activityLoading = signal(false);
+  activityError = signal('');
 
   errorMessage = '';
   successMessage = '';
@@ -39,6 +44,7 @@ export class TicketDetailsComponent implements OnInit {
     priority: ['Medium', Validators.required],
     category: ['Other', Validators.required],
     status: ['Open', Validators.required],
+    resolutionDescription: ['', [Validators.maxLength(4000)]],
   });
 
   get canEdit(): boolean {
@@ -122,18 +128,29 @@ export class TicketDetailsComponent implements OnInit {
           console.log('Ticket details received:', response);
 
           this.ticket.set(response);
+          this.loadTicketActivities(id);
 
           console.log('Ticket signal updated:', this.ticket());
         },
-        error: (error) => {
-          console.error('Unable to load ticket:', error);
 
-          this.errorMessage =
-            error.status === 401 || error.status === 403
-              ? 'You are not authorized to view this ticket.'
-              : error.status === 404
-                ? 'Ticket not found.'
-                : 'Unable to load ticket. Please try again.';
+        error: (error) => {
+          console.error('Unable to update ticket:', error);
+          console.error('API validation response:', error.error);
+
+          if (error.status === 400) {
+            const apiError = error.error;
+
+            if (apiError?.errors) {
+              this.errorMessage = Object.values(apiError.errors).flat().join(' ');
+            } else {
+              this.errorMessage =
+                apiError?.message || apiError?.title || 'Please check the submitted information.';
+            }
+          } else if (error.status === 403 || error.status === 404) {
+            this.errorMessage = 'You are not authorized to update this ticket.';
+          } else {
+            this.errorMessage = 'Unable to update ticket. Please try again.';
+          }
         },
       });
   }
@@ -148,27 +165,29 @@ export class TicketDetailsComponent implements OnInit {
       priority: currentTicket.priority,
       category: currentTicket.category,
       status: currentTicket.status,
+      resolutionDescription: currentTicket.resolutionDescription ?? '',
     });
-
-    this.editing = true;
+    this.updateResolutionValidator();
+    this.editing.set(true);
     this.errorMessage = '';
     this.successMessage = '';
   }
 
   cancelEdit(): void {
-    this.editing = false;
+    this.editing.set(false);
     this.errorMessage = '';
   }
 
   saveChanges(): void {
+    this.updateResolutionValidator();
     const currentTicket = this.ticket();
 
-    if (!currentTicket || this.editForm.invalid || this.saving) {
+    if (!currentTicket || this.editForm.invalid || this.saving()) {
       this.editForm.markAllAsTouched();
       return;
     }
 
-    this.saving = true;
+    this.saving.set(true);
     this.errorMessage = '';
 
     const request: IupdateTicketRequest = {
@@ -176,6 +195,8 @@ export class TicketDetailsComponent implements OnInit {
       description: this.editForm.controls.description.value,
       priority: this.editForm.controls.priority.value,
       category: this.editForm.controls.category.value,
+      //status: this.editForm.controls.status.value,
+      //resolutionDescription: this.editForm.controls.resolutionDescription.value,
     };
 
     // Only Admin and SupportAgent can change status.
@@ -183,29 +204,78 @@ export class TicketDetailsComponent implements OnInit {
 
     if (role === 'admin' || role === 'supportagent') {
       request.status = this.editForm.controls.status.value;
+      if (request.status === 'Resolved') {
+        request.resolutionDescription = this.editForm.controls.resolutionDescription.value.trim();
+      }
     }
 
     this.ticketService
       .updateTicket(currentTicket.id, request)
-      .pipe(finalize(() => (this.saving = false)))
+      .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: () => {
-          this.editing = false;
+          this.editing.set(false);
           this.successMessage = 'Ticket updated successfully.';
 
           this.loadTicket(currentTicket.id);
         },
         error: (error) => {
           console.error('Unable to update ticket:', error);
+          console.error('API validation response:', error.error);
 
-          this.errorMessage =
-            error.status === 403 || error.status === 404
-              ? 'You are not authorized to update this ticket.'
-              : error.status === 400
-                ? 'Please check the information and try again.'
-                : 'Unable to update ticket. Please try again.';
+          if (error.status === 400) {
+            const apiError = error.error;
+
+            if (apiError?.errors) {
+              this.errorMessage = Object.values(apiError.errors).flat().join(' ');
+            } else {
+              this.errorMessage =
+                apiError?.message || apiError?.title || 'Please check the submitted information.';
+            }
+          } else if (error.status === 403 || error.status === 404) {
+            this.errorMessage = 'You are not authorized to update this ticket.';
+          } else {
+            this.errorMessage = 'Unable to update ticket. Please try again.';
+          }
         },
       });
+  }
+
+  loadTicketActivities(ticketId: number): void {
+    this.activityLoading.set(true);
+    this.activityError.set('');
+
+    this.ticketService.getTicketActivities(ticketId).subscribe({
+      next: (activities) => {
+        this.activities.set(activities);
+        this.activityLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading ticket activities:', error);
+
+        this.activityError.set('Unable to load ticket activity history.');
+
+        this.activityLoading.set(false);
+      },
+    });
+  }
+
+  onStatusChange(): void {
+    this.updateResolutionValidator();
+  }
+
+  private updateResolutionValidator(): void {
+    const resolutionControl = this.editForm.controls.resolutionDescription;
+
+    const status = this.editForm.controls.status.value;
+
+    if (status === 'Resolved') {
+      resolutionControl.setValidators([Validators.required, Validators.maxLength(4000)]);
+    } else {
+      resolutionControl.setValidators([Validators.maxLength(4000)]);
+    }
+
+    resolutionControl.updateValueAndValidity();
   }
 
   goBack(): void {

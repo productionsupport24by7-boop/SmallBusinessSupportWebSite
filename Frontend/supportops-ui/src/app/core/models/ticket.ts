@@ -11,4 +11,5 @@ export interface Ticket {
   createdOn: string;
   updatedOn?: string | null;
   resolvedOn?: string | null;
+  resolutionDescription?: string | null;
 }

@@ -5,4 +5,5 @@ export interface IupdateTicketRequest {
   category?: string;
   status?: string;
   assignedToUserId?: number;
+  resolutionDescription?: string | null;
 }
